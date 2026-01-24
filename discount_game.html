@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Win Your Discount</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    button {
+      padding: 15px 25px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    #timer {
+      font-size: 20px;
+      margin-top: 15px;
+      color: red;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 30px;
+      font-weight: bold;
+      color: green;
+      opacity: 0;
+    }
+
+    .win {
+      animation: pop 1s ease forwards, glow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      60% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes glow {
+      0% { text-shadow: 0 0 5px gold; }
+      50% { text-shadow: 0 0 20px gold; }
+      100% { text-shadow: 0 0 5px gold; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎉 Click & Win a Discount 🎉</h1>
+  <button id="discountBtn" onclick="startGame()">Get Your Discount</button>
+
+  <div id="timer"></div>
+  <div id="result"></div>
+
+  <audio id="winSound" preload="auto">
+    <source src="https://www.soundjay.com/buttons/sounds/button-4.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    const STORAGE_KEY = "discountPlayedDate";
+    const today = new Date().toISOString().split("T")[0];
+    const winSound = document.getElementById("winSound");
+    const button = document.getElementById("discountBtn");
+
+    // 🚫 Check if already played today
+    if (localStorage.getItem(STORAGE_KEY) === today) {
+      button.disabled = true;
+      document.getElementById("result").style.opacity = 1;
+      document.getElementById("result").innerText =
+        "❌ You already played today. Come back tomorrow!";
+    }
+
+    let clicked = false;
+
+    function startGame() {
+      if (clicked) return;
+      clicked = true;
+
+      // 🔓 Unlock sound
+      winSound.play().then(() => {
+        winSound.pause();
+        winSound.currentTime = 0;
+      }).catch(() => {});
+
+      button.disabled = true;
+
+      let timeLeft = 10;
+      document.getElementById("timer").innerText =
+        "Please wait... " + timeLeft + " seconds";
+
+      const countdown = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerText =
+          "Please wait... " + timeLeft + " seconds";
+
+        if (timeLeft === 0) {
+          clearInterval(countdown);
+          showDiscount();
+        }
+      }, 1000);
+    }
+
+    function showDiscount() {
+      const discount = Math.floor(Math.random() * 11) + 10;
+
+      // ✅ Save today's date (LOCKS GAME)
+      localStorage.setItem(STORAGE_KEY, today);
+
+      document.getElementById("timer").innerText = "";
+
+      const result = document.getElementById("result");
+      result.innerText = "🎊 YOU WON " + discount + "% OFF!";
+      result.classList.add("win");
+      result.style.opacity = 1;
+
+      winSound.currentTime = 0;
+      winSound.play();
+    }
+  </script>
+
+</body>
+</html>
