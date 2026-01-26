@@ -1,3 +1,4 @@
+﻿
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +6,6 @@
   <title>Win Your Discount</title>
 
   <style>
-    /* ===== CENTER ON ALL DEVICES ===== */
     body {
       margin: 0;
       min-height: 100vh;
@@ -18,7 +18,6 @@
       overflow: hidden;
     }
 
-    /* ===== CONTENT BOX ===== */
     .overlay {
       background: rgba(255, 255, 255, 0.9);
       padding: 32px 28px;
@@ -41,6 +40,12 @@
       cursor: not-allowed;
     }
 
+    #date {
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #555;
+    }
+
     #timer {
       font-size: 20px;
       margin-top: 15px;
@@ -51,7 +56,6 @@
       font-size: 42px;
       font-weight: bold;
       margin-top: 20px;
-      color: #444;
       min-height: 50px;
     }
 
@@ -63,7 +67,6 @@
       margin-top: 10px;
     }
 
-    /* ===== WIN EFFECT ===== */
     .win {
       animation: pop 0.8s ease forwards, glow 1.5s infinite;
     }
@@ -80,13 +83,12 @@
       100% { text-shadow: 0 0 5px gold; }
     }
 
-    /* ===== CONFETTI ===== */
     .confetti {
       position: fixed;
       width: 10px;
       height: 10px;
       top: -10px;
-      animation: fall 3s linear forwards;
+      animation: fall linear forwards;
     }
 
     @keyframes fall {
@@ -107,6 +109,8 @@
 <body>
 
   <div class="overlay">
+    <div id="date"></div>
+
     <h1>🎉 Click & Win a Discount 🎉</h1>
 
     <button id="discountBtn" onclick="startGame()">Get Your Discount</button>
@@ -116,19 +120,27 @@
     <div id="result"></div>
 
     <p style="font-size:14px;margin-top:15px;">
-      Share the screenshot with the kitchen<br>
-      Valid today only
+      One scan per customer per day<br>
+      Show this screen to cashier
     </p>
   </div>
 
-  <!-- 🔊 CUSTOM SOUND -->
   <audio id="winSound" preload="auto">
     <source src="win-sound.mp3" type="audio/mpeg">
   </audio>
 
   <script>
     const STORAGE_KEY = "discountPlayedDate";
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date();
+    const todayKey = today.toISOString().split("T")[0];
+
+    document.getElementById("date").innerText =
+      "📅 Today: " + today.toLocaleDateString(undefined, {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
 
     const btn = document.getElementById("discountBtn");
     const timer = document.getElementById("timer");
@@ -136,11 +148,14 @@
     const result = document.getElementById("result");
     const winSound = document.getElementById("winSound");
 
-    // 🚫 BLOCK IF ALREADY PLAYED
-    if (localStorage.getItem(STORAGE_KEY) === today) {
+    let confettiInterval = null;
+
+    // 🚫 Already played today
+    if (localStorage.getItem(STORAGE_KEY) === todayKey) {
       btn.disabled = true;
       result.style.opacity = 1;
-      result.innerText = "❌ You already played today.\nCome back tomorrow!";
+      result.innerText =
+        "❌ Discount already used today.\nCome back tomorrow!";
     }
 
     function startGame() {
@@ -152,7 +167,7 @@
         winSound.currentTime = 0;
       }).catch(() => {});
 
-      let timeLeft = 5;
+      let timeLeft = 5; // ⏱ 5 SECONDS
       timer.innerText = "Spinning in " + timeLeft + "s";
 
       const countdown = setInterval(() => {
@@ -180,30 +195,36 @@
     function showWin() {
       const discount = Math.floor(Math.random() * 11) + 10;
 
-      localStorage.setItem(STORAGE_KEY, today);
-      slot.innerText = discount + "%";
+      localStorage.setItem(STORAGE_KEY, todayKey);
 
+      slot.innerText = discount + "%";
       result.innerText = "🎊 YOU WON " + discount + "% OFF!";
       result.classList.add("win");
       result.style.opacity = 1;
 
       winSound.currentTime = 0;
       winSound.play();
-      launchConfetti();
+
+      startConfettiLoop();
     }
 
-    function launchConfetti() {
-      for (let i = 0; i < 40; i++) {
-        const confetti = document.createElement("div");
-        confetti.className = "confetti";
-        confetti.style.left = Math.random() * 100 + "vw";
-        confetti.style.backgroundColor =
-          `hsl(${Math.random() * 360}, 100%, 50%)`;
-        confetti.style.animationDuration =
-          Math.random() * 2 + 2 + "s";
-        document.body.appendChild(confetti);
-        setTimeout(() => confetti.remove(), 3000);
-      }
+    // 🎊 CONTINUOUS CONFETTI
+    function startConfettiLoop() {
+      if (confettiInterval) return;
+
+      confettiInterval = setInterval(() => {
+        for (let i = 0; i < 8; i++) {
+          const confetti = document.createElement("div");
+          confetti.className = "confetti";
+          confetti.style.left = Math.random() * 100 + "vw";
+          confetti.style.backgroundColor =
+            `hsl(${Math.random() * 360}, 100%, 50%)`;
+          confetti.style.animationDuration =
+            Math.random() * 2 + 2 + "s";
+          document.body.appendChild(confetti);
+          setTimeout(() => confetti.remove(), 4000);
+        }
+      }, 700);
     }
   </script>
 
