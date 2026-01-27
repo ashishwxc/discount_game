@@ -18,12 +18,11 @@
     }
 
     .overlay {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       padding: 32px 28px;
       border-radius: 14px;
       max-width: 90%;
       box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-      z-index: 2;
     }
 
     h1 { margin-top: 0; }
@@ -43,14 +42,16 @@
 
     #date {
       font-size: 14px;
-      color: #555;
-      margin-bottom: 10px;
+      color: #444;
+      margin-bottom: 6px;
+      font-weight: bold;
     }
 
-    #timer {
-      font-size: 20px;
-      margin-top: 15px;
-      color: red;
+    #expiry {
+      font-size: 14px;
+      color: #b30000;
+      margin-bottom: 10px;
+      font-weight: bold;
     }
 
     #slot {
@@ -61,10 +62,18 @@
     }
 
     #result {
-      font-size: 30px;
+      font-size: 28px;
       font-weight: bold;
       color: green;
       margin-top: 10px;
+      opacity: 0;
+    }
+
+    #orderCode {
+      margin-top: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
       opacity: 0;
     }
 
@@ -100,25 +109,6 @@
       }
     }
 
-    /* 🖼️ Watermark */
-    .watermark {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 260px;
-      opacity: 0.08;
-      pointer-events: none;
-      z-index: 0;
-      animation: watermarkPulse 6s infinite ease-in-out;
-    }
-
-    @keyframes watermarkPulse {
-      0% { opacity: 0.06; }
-      50% { opacity: 0.12; }
-      100% { opacity: 0.06; }
-    }
-
     @media (max-width: 480px) {
       .overlay { padding: 24px 20px; }
       #slot { font-size: 34px; }
@@ -129,29 +119,26 @@
 
 <body>
 
-  <!-- 🖼️ WATERMARK LOGO -->
-  <img src="umami-aroma-logo.png" class="watermark" alt="Umami & Aroma">
-
   <div class="overlay">
     <div id="date"></div>
+    <div id="expiry">⏰ Valid for today only</div>
 
     <h1>🎉 Click & Win a Discount 🎉</h1>
 
     <button id="discountBtn" onclick="startGame()">Get Your Discount</button>
 
-    <div id="timer"></div>
     <div id="slot">🎰</div>
     <div id="result"></div>
+    <div id="orderCode"></div>
 
     <p style="font-size:14px;margin-top:15px;">
-      One scan per customer per day<br>
-      Show this screen to cashier
+      Please share the screenshot and the code with the restaurant for reference. <br>
     </p>
   </div>
 
   <!-- 🔊 SOUND -->
   <audio id="winSound" preload="auto">
-    <source src="win-sound.wav" type="audio/wav">
+    <source src="win-sound.mp3" type="audio/mpeg">
   </audio>
 
   <script>
@@ -159,8 +146,22 @@
     const today = new Date();
     const todayKey = today.toISOString().split("T")[0];
 
+    const DISCOUNT_CODES = {
+      10: "UA-7B3M9Q",
+      11: "UA-K8F2A6",
+      12: "UA-9Q4L2X",
+      13: "UA-M5A7C8",
+      14: "UA-2XQ9F4",
+      15: "UA-8L6K3M",
+      16: "UA-F4Q7A9",
+      17: "UA-6C2X8L",
+      18: "UA-Q9M5F2",
+      19: "UA-A7L4K6",
+      20: "UA-3F8Q9X"
+    };
+
     document.getElementById("date").innerText =
-      "📅 Today: " + today.toLocaleDateString(undefined, {
+      "📅 Date: " + today.toLocaleDateString(undefined, {
         weekday: "long",
         day: "numeric",
         month: "long",
@@ -168,14 +169,14 @@
       });
 
     const btn = document.getElementById("discountBtn");
-    const timer = document.getElementById("timer");
     const slot = document.getElementById("slot");
     const result = document.getElementById("result");
+    const orderCodeEl = document.getElementById("orderCode");
     const winSound = document.getElementById("winSound");
 
     let confettiInterval = null;
 
-    // 🚫 Already used today
+    // 🚫 One use per day
     if (localStorage.getItem(STORAGE_KEY) === todayKey) {
       btn.disabled = true;
       result.style.opacity = 1;
@@ -190,20 +191,10 @@
         winSound.currentTime = 0;
       }).catch(() => {});
 
-      let timeLeft = 5;
-      timer.innerText = "Spinning in " + timeLeft + "s";
-
-      const countdown = setInterval(() => {
-        timeLeft--;
-        timer.innerText = "Spinning in " + timeLeft + "s";
-        if (timeLeft === 0) {
-          clearInterval(countdown);
-          spinSlot();
-        }
-      }, 1000);
+      spinSlot();
     }
 
-    // 🎰 SHOW 1–50 WHILE SPINNING
+    // 🎰 Spin shows 1–50
     function spinSlot() {
       let spins = 25;
       const interval = setInterval(() => {
@@ -216,16 +207,20 @@
       }, 100);
     }
 
-    // 🎯 FINAL DISCOUNT 10–20 ONLY
+    // 🎯 Final result uses ONLY your codes
     function showWin() {
       const discount = Math.floor(Math.random() * 11) + 10;
+      const code = DISCOUNT_CODES[discount];
 
       localStorage.setItem(STORAGE_KEY, todayKey);
 
       slot.innerText = discount + "%";
       result.innerText = "🎊 YOU WON " + discount + "% OFF!";
+      orderCodeEl.innerText = "🧾 Discount Code: " + code;
+
       result.classList.add("win");
       result.style.opacity = 1;
+      orderCodeEl.style.opacity = 1;
 
       winSound.currentTime = 0;
       winSound.play();
@@ -233,21 +228,19 @@
       startConfettiLoop();
     }
 
-    // 🎊 CONTINUOUS CONFETTI
     function startConfettiLoop() {
       if (confettiInterval) return;
-
       confettiInterval = setInterval(() => {
         for (let i = 0; i < 8; i++) {
-          const confetti = document.createElement("div");
-          confetti.className = "confetti";
-          confetti.style.left = Math.random() * 100 + "vw";
-          confetti.style.backgroundColor =
-            `hsl(${Math.random() * 360}, 100%, 50%)`;
-          confetti.style.animationDuration =
+          const c = document.createElement("div");
+          c.className = "confetti";
+          c.style.left = Math.random() * 100 + "vw";
+          c.style.backgroundColor =
+            `hsl(${Math.random() * 360},100%,50%)`;
+          c.style.animationDuration =
             Math.random() * 2 + 2 + "s";
-          document.body.appendChild(confetti);
-          setTimeout(() => confetti.remove(), 4000);
+          document.body.appendChild(c);
+          setTimeout(() => c.remove(), 4000);
         }
       }, 700);
     }
