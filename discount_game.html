@@ -1,250 +1,233 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Win Your Discount</title>
+<meta charset="UTF-8">
+<title>Win Your Discount</title>
 
-  <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #ffecd2, #fcb69f);
-      overflow: hidden;
-    }
+<style>
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #ffecd2, #fcb69f);
+  overflow: hidden;
+}
 
-    .overlay {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 32px 28px;
-      border-radius: 14px;
-      max-width: 90%;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-    }
+.overlay {
+  background: rgba(255,255,255,0.95);
+  padding: 32px 28px;
+  border-radius: 14px;
+  max-width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
 
-    h1 { margin-top: 0; }
+button {
+  padding: 14px 26px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
 
-    button {
-      padding: 14px 26px;
-      font-size: 18px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-    }
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
 
-    button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
+#date {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
 
-    #date {
-      font-size: 14px;
-      color: #444;
-      margin-bottom: 6px;
-      font-weight: bold;
-    }
+#expiry {
+  font-size: 14px;
+  color: #b30000;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
 
-    #expiry {
-      font-size: 14px;
-      color: #b30000;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
+#slot {
+  font-size: 42px;
+  font-weight: bold;
+  margin-top: 20px;
+  min-height: 50px;
+}
 
-    #slot {
-      font-size: 42px;
-      font-weight: bold;
-      margin-top: 20px;
-      min-height: 50px;
-    }
+#result {
+  font-size: 28px;
+  font-weight: bold;
+  color: green;
+  margin-top: 10px;
+  opacity: 0;
+}
 
-    #result {
-      font-size: 28px;
-      font-weight: bold;
-      color: green;
-      margin-top: 10px;
-      opacity: 0;
-    }
+#orderCode {
+  font-size: 18px;
+  margin-top: 8px;
+  font-weight: bold;
+  opacity: 0;
+}
 
-    #orderCode {
-      margin-top: 8px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-      opacity: 0;
-    }
+.win {
+  animation: pop 0.8s ease forwards, glow 1.5s infinite;
+}
 
-    .win {
-      animation: pop 0.8s ease forwards, glow 1.5s infinite;
-    }
+@keyframes pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
-    @keyframes pop {
-      0% { transform: scale(0.5); opacity: 0; }
-      60% { transform: scale(1.3); opacity: 1; }
-      100% { transform: scale(1); opacity: 1; }
-    }
+@keyframes glow {
+  0% { text-shadow: 0 0 5px gold; }
+  50% { text-shadow: 0 0 20px gold; }
+  100% { text-shadow: 0 0 5px gold; }
+}
 
-    @keyframes glow {
-      0% { text-shadow: 0 0 5px gold; }
-      50% { text-shadow: 0 0 20px gold; }
-      100% { text-shadow: 0 0 5px gold; }
-    }
+/* Confetti */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  animation: fall linear forwards;
+}
 
-    /* 🎊 Confetti */
-    .confetti {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      top: -10px;
-      animation: fall linear forwards;
-    }
+@keyframes fall {
+  to {
+    transform: translateY(110vh) rotate(360deg);
+    opacity: 0;
+  }
+}
 
-    @keyframes fall {
-      to {
-        transform: translateY(110vh) rotate(360deg);
-        opacity: 0;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .overlay { padding: 24px 20px; }
-      #slot { font-size: 34px; }
-      #result { font-size: 24px; }
-    }
-  </style>
+@media (max-width: 480px) {
+  #slot { font-size: 34px; }
+  #result { font-size: 24px; }
+}
+</style>
 </head>
 
 <body>
 
-  <div class="overlay">
-    <div id="date"></div>
-    <div id="expiry">⏰ Valid for today only</div>
+<div class="overlay">
+  <div id="date"></div>
+  <div id="expiry">⏰ Valid for today only</div>
 
-    <h1>🎉 Click & Win a Discount 🎉</h1>
+  <h2>🎉 Click & Win a Discount 🎉</h2>
 
-    <button id="discountBtn" onclick="startGame()">Get Your Discount</button>
+  <button id="discountBtn" onclick="startGame()">Get Your Discount</button>
 
-    <div id="slot">🎰</div>
-    <div id="result"></div>
-    <div id="orderCode"></div>
+  <div id="slot">🎰</div>
+  <div id="result"></div>
+  <div id="orderCode"></div>
 
-    <p style="font-size:14px;margin-top:15px;">
-      Please share the screenshot and the code with the restaurant for reference. <br>
-    </p>
-  </div>
+  <p style="font-size:14px;margin-top:15px;">
+    Share the screenshot of the coupon code with the restaurant.
+  </p>
+</div>
 
-  <!-- 🔊 SOUND -->
-  <audio id="winSound" preload="auto">
-    <source src="win-sound.mp3" type="audio/mpeg">
-  </audio>
+<!-- SOUND -->
+<audio id="winSound" src="win-sound.mp3"></audio>
 
-  <script>
-    const STORAGE_KEY = "discountPlayedDate";
-    const today = new Date();
-    const todayKey = today.toISOString().split("T")[0];
+<script>
+const STORAGE_KEY = "discountPlayedDate";
+const todayKey = new Date().toISOString().split("T")[0];
 
-    const DISCOUNT_CODES = {
-      10: "UA-7B3M9Q",
-      11: "UA-K8F2A6",
-      12: "UA-9Q4L2X",
-      13: "UA-M5A7C8",
-      14: "UA-2XQ9F4",
-      15: "UA-8L6K3M",
-      16: "UA-F4Q7A9",
-      17: "UA-6C2X8L",
-      18: "UA-Q9M5F2",
-      19: "UA-A7L4K6",
-      20: "UA-3F8Q9X"
-    };
+const DISCOUNT_CODES = {
+  10: "UA-7B3M9Q",
+  11: "UA-K8F2A6",
+  12: "UA-9Q4L2X",
+  13: "UA-M5A7C8",
+  14: "UA-2XQ9F4",
+  15: "UA-8L6K3M",
+  16: "UA-F4Q7A9",
+  17: "UA-6C2X8L",
+  18: "UA-Q9M5F2",
+  19: "UA-A7L4K6",
+  20: "UA-3F8Q9X"
+};
 
-    document.getElementById("date").innerText =
-      "📅 Date: " + today.toLocaleDateString(undefined, {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-      });
+document.getElementById("date").innerText =
+  "📅 " + new Date().toDateString();
 
-    const btn = document.getElementById("discountBtn");
-    const slot = document.getElementById("slot");
-    const result = document.getElementById("result");
-    const orderCodeEl = document.getElementById("orderCode");
-    const winSound = document.getElementById("winSound");
+const btn = document.getElementById("discountBtn");
+const slot = document.getElementById("slot");
+const result = document.getElementById("result");
+const orderCodeEl = document.getElementById("orderCode");
+const winSound = document.getElementById("winSound");
 
-    let confettiInterval = null;
+let confettiInterval = null;
 
-    // 🚫 One use per day
-    if (localStorage.getItem(STORAGE_KEY) === todayKey) {
-      btn.disabled = true;
-      result.style.opacity = 1;
-      result.innerText = "❌ Discount already used today.\nCome back tomorrow!";
+// One use per day
+if (localStorage.getItem(STORAGE_KEY) === todayKey) {
+  btn.disabled = true;
+  result.style.opacity = 1;
+  result.innerText = "❌ Discount already used today.\nCome back tomorrow!";
+}
+
+function startGame() {
+  btn.disabled = true;
+  spinSlot();
+}
+
+// Slot animation 1–50
+function spinSlot() {
+  let spins = 25;
+  const interval = setInterval(() => {
+    slot.innerText = Math.floor(Math.random() * 50 + 1) + "%";
+    spins--;
+    if (spins === 0) {
+      clearInterval(interval);
+      showWin();
     }
+  }, 100);
+}
 
-    function startGame() {
-      btn.disabled = true;
+// Final result (10–20 only)
+function showWin() {
+  const discount = Math.floor(Math.random() * 11) + 10;
+  const code = DISCOUNT_CODES[discount];
 
-      winSound.play().then(() => {
-        winSound.pause();
-        winSound.currentTime = 0;
-      }).catch(() => {});
+  localStorage.setItem(STORAGE_KEY, todayKey);
 
-      spinSlot();
+  slot.innerText = discount + "%";
+  result.innerText = "🎊 YOU WON " + discount + "% OFF!";
+  orderCodeEl.innerText = "🧾 Discount Code: " + code;
+
+  result.classList.add("win");
+  result.style.opacity = 1;
+  orderCodeEl.style.opacity = 1;
+
+  // PLAY SOUND ONCE
+  winSound.currentTime = 0;
+  winSound.play();
+
+  startConfettiLoop();
+}
+
+// Confetti loop
+function startConfettiLoop() {
+  if (confettiInterval) return;
+  confettiInterval = setInterval(() => {
+    for (let i = 0; i < 8; i++) {
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.backgroundColor =
+        `hsl(${Math.random() * 360},100%,50%)`;
+      c.style.animationDuration =
+        Math.random() * 2 + 2 + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 4000);
     }
-
-    // 🎰 Spin shows 1–50
-    function spinSlot() {
-      let spins = 25;
-      const interval = setInterval(() => {
-        slot.innerText = (Math.floor(Math.random() * 50) + 1) + "%";
-        spins--;
-        if (spins === 0) {
-          clearInterval(interval);
-          showWin();
-        }
-      }, 100);
-    }
-
-    // 🎯 Final result uses ONLY your codes
-    function showWin() {
-      const discount = Math.floor(Math.random() * 11) + 10;
-      const code = DISCOUNT_CODES[discount];
-
-      localStorage.setItem(STORAGE_KEY, todayKey);
-
-      slot.innerText = discount + "%";
-      result.innerText = "🎊 YOU WON " + discount + "% OFF!";
-      orderCodeEl.innerText = "🧾 Discount Code: " + code;
-
-      result.classList.add("win");
-      result.style.opacity = 1;
-      orderCodeEl.style.opacity = 1;
-
-      winSound.currentTime = 0;
-      winSound.play();
-
-      startConfettiLoop();
-    }
-
-    function startConfettiLoop() {
-      if (confettiInterval) return;
-      confettiInterval = setInterval(() => {
-        for (let i = 0; i < 8; i++) {
-          const c = document.createElement("div");
-          c.className = "confetti";
-          c.style.left = Math.random() * 100 + "vw";
-          c.style.backgroundColor =
-            `hsl(${Math.random() * 360},100%,50%)`;
-          c.style.animationDuration =
-            Math.random() * 2 + 2 + "s";
-          document.body.appendChild(c);
-          setTimeout(() => c.remove(), 4000);
-        }
-      }, 700);
-    }
-  </script>
+  }, 700);
+}
+</script>
 
 </body>
 </html>
