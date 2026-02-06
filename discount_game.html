@@ -2,112 +2,77 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Win Your Discount</title>
+<title>Spin & Win</title>
 
 <style>
-body {
-  margin: 0;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #ffecd2, #fcb69f);
-  overflow: hidden;
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#ffecd2,#fcb69f);
+  overflow:hidden;
 }
 
-.overlay {
-  background: rgba(255,255,255,0.95);
-  padding: 32px 28px;
-  border-radius: 14px;
-  max-width: 90%;
-  text-align: center;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+.overlay{
+  background:white;
+  padding:32px 28px;
+  border-radius:14px;
+  max-width:90%;
+  text-align:center;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
 }
 
-button {
-  padding: 14px 26px;
-  font-size: 18px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
+button{
+  padding:14px 26px;
+  font-size:18px;
+  border-radius:8px;
+  border:none;
+  background:#ff7a00;
+  color:white;
+  cursor:pointer;
 }
 
-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+button:disabled{
+  background:#ccc;
+  cursor:not-allowed;
 }
 
-#date {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 6px;
+#slot{
+  font-size:42px;
+  margin-top:20px;
 }
 
-#expiry {
-  font-size: 14px;
-  color: #b30000;
-  margin-bottom: 10px;
-  font-weight: bold;
+#result{
+  font-size:26px;
+  font-weight:bold;
+  color:green;
+  margin-top:10px;
+  opacity:0;
 }
 
-#slot {
-  font-size: 42px;
-  font-weight: bold;
-  margin-top: 20px;
-  min-height: 50px;
+#code{
+  font-size:18px;
+  margin-top:8px;
+  font-weight:bold;
+  opacity:0;
 }
 
-#result {
-  font-size: 28px;
-  font-weight: bold;
-  color: green;
-  margin-top: 10px;
-  opacity: 0;
+.confetti{
+  position:fixed;
+  width:10px;
+  height:10px;
+  top:-10px;
+  animation:fall linear forwards;
 }
 
-#orderCode {
-  font-size: 18px;
-  margin-top: 8px;
-  font-weight: bold;
-  opacity: 0;
-}
-
-.win {
-  animation: pop 0.8s ease forwards, glow 1.5s infinite;
-}
-
-@keyframes pop {
-  0% { transform: scale(0.5); opacity: 0; }
-  60% { transform: scale(1.3); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes glow {
-  0% { text-shadow: 0 0 5px gold; }
-  50% { text-shadow: 0 0 20px gold; }
-  100% { text-shadow: 0 0 5px gold; }
-}
-
-/* Confetti */
-.confetti {
-  position: fixed;
-  width: 10px;
-  height: 10px;
-  top: -10px;
-  animation: fall linear forwards;
-}
-
-@keyframes fall {
-  to {
-    transform: translateY(110vh) rotate(360deg);
-    opacity: 0;
+@keyframes fall{
+  to{
+    transform:translateY(110vh) rotate(360deg);
+    opacity:0;
   }
-}
-
-@media (max-width: 480px) {
-  #slot { font-size: 34px; }
-  #result { font-size: 24px; }
 }
 </style>
 </head>
@@ -115,117 +80,140 @@ button:disabled {
 <body>
 
 <div class="overlay">
-  <div id="date"></div>
-  <div id="expiry">⏰ Valid for today only</div>
+  <h2>🎉 Spin & Win 🎉</h2>
 
-  <h2>🎉 Click & Win a Discount 🎉</h2>
-
-  <button id="discountBtn" onclick="startGame()">Get Your Discount</button>
+  <button id="btn" onclick="startGame()">Get Your Reward</button>
 
   <div id="slot">🎰</div>
   <div id="result"></div>
-  <div id="orderCode"></div>
+  <div id="code"></div>
 
-  <p style="font-size:14px;margin-top:15px;">
-    Share the screenshot of the coupon code with the restaurant.
-  </p>
+  <p style="font-size:14px">Show this screen to staff</p>
 </div>
 
-<!-- SOUND -->
-<audio id="winSound" src="win-sound.mp3"></audio>
+<!-- 🔊 SOUND FILE -->
+<audio id="winSound" src="win-sound.mp3" preload="auto"></audio>
 
 <script>
-const STORAGE_KEY = "discountPlayedDate";
-const todayKey = new Date().toISOString().split("T")[0];
+// ======================
+// DAILY LOCK
+// ======================
+const STORAGE_KEY="playedDate";
+const todayKey=new Date().toISOString().split("T")[0];
 
-const DISCOUNT_CODES = {
-  10: "UA-7B3M9Q",
-  11: "UA-K8F2A6",
-  12: "UA-9Q4L2X",
-  13: "UA-M5A7C8",
-  14: "UA-2XQ9F4",
-  15: "UA-8L6K3M",
-  16: "UA-F4Q7A9",
-  17: "UA-6C2X8L",
-  18: "UA-Q9M5F2",
-  19: "UA-A7L4K6",
-  20: "UA-3F8Q9X"
-};
+// ======================
+// REWARD TIERS
+// ======================
+const COMMON=[
+ {text:"5% OFF",code:"UA-5FQ9A2"},
+ {text:"6% OFF",code:"UA-6M3KQ8"},
+ {text:"7% OFF",code:"UA-7A2F9M"},
+ {text:"8% OFF",code:"UA-8Q5M2A"},
+ {text:"9% OFF",code:"UA-9F2KQ7"},
+ {text:"10% OFF",code:"UA-7B3M9Q"},
+ {text:"11% OFF",code:"UA-K8F2A6"},
+ {text:"12% OFF",code:"UA-9Q4L2X"},
+ {text:"13% OFF",code:"UA-M5A7C8"},
+ {text:"14% OFF",code:"UA-2XQ9F4"}
+];
 
-document.getElementById("date").innerText =
-  "📅 " + new Date().toDateString();
+const RARE=[
+ {text:"15% OFF",code:"UA-8L6K3M"},
+ {text:"16% OFF",code:"UA-F4Q7A9"},
+ {text:"17% OFF",code:"UA-6C2X8L"}
+];
 
-const btn = document.getElementById("discountBtn");
-const slot = document.getElementById("slot");
-const result = document.getElementById("result");
-const orderCodeEl = document.getElementById("orderCode");
-const winSound = document.getElementById("winSound");
+const ULTRA_RARE=[
+ {text:"18% OFF",code:"UA-Q9M5F2"},
+ {text:"19% OFF",code:"UA-A7L4K6"},
+ {text:"20% OFF",code:"UA-3F8Q9X"},
+ {text:"🍝 Buy 1 Get 1 Free Pasta",code:"UA-PB7X2L"},
+ {text:"🥤 Free 500ml Main",code:"UA-M5Q8A2"},
+ {text:"🍹 Free Homemade Iced Tea",code:"UA-T9F3KQ"},
+ {text:"☕ Free Iced Americano",code:"UA-A7M2QX"}
+];
 
-let confettiInterval = null;
+// ======================
 
-// One use per day
-if (localStorage.getItem(STORAGE_KEY) === todayKey) {
-  btn.disabled = true;
-  result.style.opacity = 1;
-  result.innerText = "❌ Discount already used today.\nCome back tomorrow!";
+const btn=document.getElementById("btn");
+const slot=document.getElementById("slot");
+const result=document.getElementById("result");
+const codeEl=document.getElementById("code");
+const sound=document.getElementById("winSound");
+
+// Lock if already played today
+if(localStorage.getItem(STORAGE_KEY)===todayKey){
+  btn.disabled=true;
+  result.style.opacity=1;
+  result.innerText="❌ Already used today";
 }
 
-function startGame() {
-  btn.disabled = true;
-  spinSlot();
+// ======================
+
+function startGame(){
+  btn.disabled=true;
+  spin();
 }
 
-// Slot animation 1–50
-function spinSlot() {
-  let spins = 25;
-  const interval = setInterval(() => {
-    slot.innerText = Math.floor(Math.random() * 50 + 1) + "%";
+function spin(){
+  let spins=25;
+  const i=setInterval(()=>{
+    slot.innerText=Math.floor(Math.random()*50+1);
     spins--;
-    if (spins === 0) {
-      clearInterval(interval);
-      showWin();
+    if(spins===0){
+      clearInterval(i);
+      showReward();
     }
-  }, 100);
+  },100);
 }
 
-// Final result (10–20 only)
-function showWin() {
-  const discount = Math.floor(Math.random() * 11) + 10;
-  const code = DISCOUNT_CODES[discount];
-
-  localStorage.setItem(STORAGE_KEY, todayKey);
-
-  slot.innerText = discount + "%";
-  result.innerText = "🎊 YOU WON " + discount + "% OFF!";
-  orderCodeEl.innerText = "🧾 Discount Code: " + code;
-
-  result.classList.add("win");
-  result.style.opacity = 1;
-  orderCodeEl.style.opacity = 1;
-
-  // PLAY SOUND ONCE
-  winSound.currentTime = 0;
-  winSound.play();
-
-  startConfettiLoop();
+// ======================
+// WEIGHTED PICK
+// 70% Common
+// 20% Rare
+// 10% Ultra Rare
+// ======================
+function weightedPick(){
+  const roll=Math.random();
+  if(roll<0.70) return COMMON[Math.floor(Math.random()*COMMON.length)];
+  if(roll<0.90) return RARE[Math.floor(Math.random()*RARE.length)];
+  return ULTRA_RARE[Math.floor(Math.random()*ULTRA_RARE.length)];
 }
 
-// Confetti loop
-function startConfettiLoop() {
-  if (confettiInterval) return;
-  confettiInterval = setInterval(() => {
-    for (let i = 0; i < 8; i++) {
-      const c = document.createElement("div");
-      c.className = "confetti";
-      c.style.left = Math.random() * 100 + "vw";
-      c.style.backgroundColor =
-        `hsl(${Math.random() * 360},100%,50%)`;
-      c.style.animationDuration =
-        Math.random() * 2 + 2 + "s";
+// ======================
+
+function showReward(){
+  localStorage.setItem(STORAGE_KEY,todayKey);
+
+  const reward=weightedPick();
+
+  slot.innerText="🎉";
+  result.innerText="🎊 "+reward.text;
+  codeEl.innerText="🧾 Code: "+reward.code;
+
+  result.style.opacity=1;
+  codeEl.style.opacity=1;
+
+  sound.currentTime=0;
+  sound.play();
+
+  startConfetti();
+}
+
+// ======================
+
+function startConfetti(){
+  setInterval(()=>{
+    for(let i=0;i<6;i++){
+      const c=document.createElement("div");
+      c.className="confetti";
+      c.style.left=Math.random()*100+"vw";
+      c.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
+      c.style.animationDuration=(Math.random()*2+2)+"s";
       document.body.appendChild(c);
-      setTimeout(() => c.remove(), 4000);
+      setTimeout(()=>c.remove(),4000);
     }
-  }, 700);
+  },700);
 }
 </script>
 
