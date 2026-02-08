@@ -6,88 +6,87 @@
 
 <style>
 body{
- margin:0;
- min-height:100vh;
- display:flex;
- justify-content:center;
- align-items:center;
- background:linear-gradient(135deg,#ffecd2,#fcb69f);
- font-family:Arial;
- overflow:hidden;
+ margin:0;
+ min-height:100vh;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ background:linear-gradient(135deg,#ffecd2,#fcb69f);
+ font-family:Arial;
+ overflow:hidden;
 }
 
 .overlay{
- background:#fff;
- padding:40px;
- border-radius:20px;
- text-align:center;
- width:90%;
- max-width:450px;
- transform:scale(1.3);
- box-shadow:0 8px 30px rgba(0,0,0,.25);
+ background:#fff;
+ padding:40px;
+ border-radius:20px;
+ text-align:center;
+ width:90%;
+ max-width:460px;
+ transform:scale(1.25);
+ box-shadow:0 10px 35px rgba(0,0,0,.25);
 }
 
 input{
- padding:14px;
- width:90%;
- font-size:18px;
- margin-bottom:15px;
+ padding:16px;
+ width:92%;
+ font-size:18px;
+ margin-bottom:15px;
 }
 
 button{
- padding:14px 30px;
- font-size:18px;
- border:none;
- border-radius:8px;
- background:#27ae60;
- color:white;
- cursor:pointer;
+ padding:15px 32px;
+ font-size:18px;
+ border:none;
+ border-radius:8px;
+ background:#27ae60;
+ color:white;
+ cursor:pointer;
 }
 
-button:disabled{background:#999;}
+button:disabled{background:#aaa;}
 
 #slot{
- font-size:60px;
- margin:20px 0;
+ font-size:58px;
+ margin:22px 0;
 }
 
 #result,#code,#note{
- font-size:22px;
- font-weight:bold;
- opacity:0;
- margin-top:10px;
+ font-size:22px;
+ font-weight:bold;
+ opacity:0;
+ margin-top:12px;
 }
 
 #note{
- font-size:16px;
- color:#b00000;
+ font-size:16px;
+ color:#b00000;
 }
 
 .win{
- animation:pop .8s ease forwards,glow 1.5s infinite;
+ animation:pop .8s ease forwards,glow 1.5s infinite;
 }
 
 @keyframes pop{
- 0%{transform:scale(.5);opacity:0}
- 60%{transform:scale(1.3);opacity:1}
- 100%{transform:scale(1);opacity:1}
+ 0%{transform:scale(.5);opacity:0}
+ 60%{transform:scale(1.3);opacity:1}
+ 100%{transform:scale(1);opacity:1}
 }
 @keyframes glow{
- 0%{text-shadow:0 0 5px gold}
- 50%{text-shadow:0 0 20px gold}
- 100%{text-shadow:0 0 5px gold}
+ 0%{text-shadow:0 0 5px gold}
+ 50%{text-shadow:0 0 20px gold}
+ 100%{text-shadow:0 0 5px gold}
 }
 
-/* confetti */
 .confetti{
- position:fixed;
- width:10px;
- height:10px;
- top:-10px;
- animation:fall linear forwards;
+ position:fixed;
+ width:10px;
+ height:10px;
+ top:-10px;
+ animation:fall linear forwards;
 }
 @keyframes fall{
- to{transform:translateY(110vh) rotate(360deg);opacity:0}
+ to{transform:translateY(110vh) rotate(360deg);opacity:0}
 }
 </style>
 </head>
@@ -102,10 +101,10 @@ button:disabled{background:#999;}
 
 <div id="game" style="display:none">
 
-<h2>🎉 Spin & Win 🎉</h2>
+<h2> Spin & Win </h2>
 <button id="playBtn" onclick="play()">Get Discount</button>
 
-<div id="slot">🎰</div>
+<div id="slot"> </div>
 <div id="result"></div>
 <div id="code"></div>
 <div id="note"></div>
@@ -122,141 +121,142 @@ button:disabled{background:#999;}
 
 const API_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
 
-/* ====== REWARDS ====== */
+/* ===== DEVICE DETECTION ===== */
+
+function getDeviceType(){
+ const ua=navigator.userAgent;
+ if(/android/i.test(ua)) return "Android";
+ if(/iPad|iPhone|iPod/.test(ua)) return "Apple iOS";
+ return "Desktop / Other";
+}
+
+/* ===== REWARDS ===== */
 
 const COMMON=[
- {text:"10% OFF",code:"UA-7B3M9Q"},
- {text:"11% OFF",code:"UA-K8F2A6"},
- {text:"12% OFF",code:"UA-9Q4L2X"},
- {text:"13% OFF",code:"UA-M5A7C8"},
- {text:"14% OFF",code:"UA-2XQ9F4"},
- {text:"15% OFF",code:"UA-8L6K3M"}
+ {text:"10% OFF",code:"UA-7B3M9Q"},
+ {text:"12% OFF",code:"UA-9Q4L2X"},
+ {text:"15% OFF",code:"UA-8L6K3M"},
+ {text:" Free Homemade Iced Tea",code:"UA-T9F3KQ"},
+ {text:" Free Iced Americano",code:"UA-A7M2QX"}
 ];
 
 const RARE=[
- {text:"16% OFF",code:"UA-F4Q7A9"},
- {text:"17% OFF",code:"UA-6C2X8L"},
- {text:"18% OFF",code:"UA-Q9M5F2"},
- {text:"19% OFF",code:"UA-A7L4K6"},
- {text:"20% OFF",code:"UA-3F8Q9X"},
- {text:"🥤 Free Homemade Iced Tea (₹59)",code:"UA-T9F3KQ"},
- {text:"☕ Free Iced Americano (₹59)",code:"UA-A7M2QX"}
+ {text:"16% OFF",code:"UA-F4Q7A9"},
+ {text:"18% OFF",code:"UA-Q9M5F2"},
+ {text:"20% OFF",code:"UA-3F8Q9X"},
+ {text:" Buy 2 Beverages Get 1 Free",code:"UA-2B9MFX"},
+ {text:" Free Peri Peri Fries",code:"UA-PF7Q2L"},
+ {text:" Buy Any Burger + Get Fries Free",code:"UA-BF9Q2K"},
+ {text:" Buy Any Sandwich + Get Soft Drink Free",code:"UA-SD7M3Q"},
+ {text:" Get Free Fries",code:"UA-FR6K2Q"}
 ];
 
 const ULTRA_RARE=[
- {text:"🍝 Buy 1 Get 1 Free Pasta",code:"UA-PB7X2L"}
+ {text:" Buy 1 Get 1 Free Pasta",code:"UA-PB7X2L"}
 ];
 
-/* ====== PHONE VERIFY ====== */
+/* ===== PHONE VERIFY ===== */
 
 let phone="";
 
 function verifyPhone(){
 
- phone=document.getElementById("phone").value.trim();
+ phone=document.getElementById("phone").value.trim();
 
- if(!/^[0-9]{10}$/.test(phone)){
-   alert("Enter valid 10-digit number");
-   return;
- }
+ if(!/^[0-9]{10}$/.test(phone)){
+   alert("Enter valid 10-digit number");
+   return;
+ }
 
- fetch(API_URL+"?phone="+phone)
- .then(r=>r.text())
- .then(res=>{
-   if(res==="ALREADY_USED"){
-     alert("Already played today");
-   }else{
-     document.getElementById("phone").style.display="none";
-     document.getElementById("verifyBtn").style.display="none";
-     document.getElementById("phoneTitle").style.display="none";
-     document.getElementById("game").style.display="block";
-   }
- });
+ const device=getDeviceType();
+
+ fetch(API_URL+"?phone="+phone+"&device="+device)
+ .then(r=>r.text())
+ .then(res=>{
+   if(res==="ALREADY_USED"){
+     alert("Already played today");
+   }else{
+     document.getElementById("phone").style.display="none";
+     document.getElementById("verifyBtn").style.display="none";
+     document.getElementById("phoneTitle").style.display="none";
+     document.getElementById("game").style.display="block";
+   }
+ });
 }
 
-/* ====== GAME ====== */
+/* ===== GAME ===== */
 
 function play(){
- document.getElementById("playBtn").disabled=true;
- spin();
+ document.getElementById("playBtn").disabled=true;
+ spin();
 }
 
 function spin(){
+ let spins=25;
 
- let spins=25;
-
- const interval=setInterval(()=>{
-   document.getElementById("slot").innerText=
-   Math.floor(Math.random()*50)+1;
-   spins--;
-
-   if(spins===0){
-     clearInterval(interval);
-     showWin();
-   }
- },100);
+ const interval=setInterval(()=>{
+  document.getElementById("slot").innerText=
+   Math.floor(Math.random()*50)+1;
+  spins--;
+  if(spins===0){
+    clearInterval(interval);
+    showWin();
+  }
+ },100);
 }
 
-/* ====== PROBABILITY ====== */
+/* ===== PROBABILITY ===== */
 
 function getReward(){
-
- const chance=Math.random()*100;
-
- if(chance<70){
-   return COMMON[Math.floor(Math.random()*COMMON.length)];
- }
- else if(chance<95){
-   return RARE[Math.floor(Math.random()*RARE.length)];
- }
- else{
-   return ULTRA_RARE[0];
- }
+ const chance=Math.random()*100;
+ if(chance<60) return COMMON[Math.floor(Math.random()*COMMON.length)];
+ if(chance<90) return RARE[Math.floor(Math.random()*RARE.length)];
+ return ULTRA_RARE[Math.floor(Math.random()*ULTRA_RARE.length)];
 }
 
-/* ====== WIN ====== */
+/* ===== WIN ===== */
 
 function showWin(){
 
- const reward=getReward();
+ const reward=getReward();
 
- document.getElementById("slot").innerText=reward.text;
- document.getElementById("result").innerText="🎉 YOU WON "+reward.text;
- document.getElementById("code").innerText="CODE: "+reward.code;
+ document.getElementById("slot").innerText=reward.text;
+ document.getElementById("result").innerText=" YOU WON "+reward.text;
+ document.getElementById("code").innerText="CODE: "+reward.code;
 
- document.getElementById("note").innerText=
- "Do not refresh or leave the screen. Take a screenshot and share it while placing the order.";
+ document.getElementById("note").innerText=
+ "Do not refresh or leave the screen.\nTake a screenshot and share it while placing the order.";
 
- document.getElementById("result").classList.add("win");
- document.getElementById("result").style.opacity=1;
- document.getElementById("code").style.opacity=1;
- document.getElementById("note").style.opacity=1;
+ document.getElementById("result").classList.add("win");
+ document.getElementById("result").style.opacity=1;
+ document.getElementById("code").style.opacity=1;
+ document.getElementById("note").style.opacity=1;
 
- document.getElementById("winSound").currentTime=0;
- document.getElementById("winSound").play();
+ const sound=document.getElementById("winSound");
+ sound.currentTime=0;
+ sound.play();
 
- startConfetti();
+ startConfetti();
 }
 
-/* ====== CONFETTI LOOP ====== */
+/* ===== CONFETTI ===== */
 
 let confettiLoop=null;
 
 function startConfetti(){
+ if(confettiLoop) return;
 
- if(confettiLoop) return;
-
- confettiLoop=setInterval(()=>{
-   for(let i=0;i<8;i++){
-     const c=document.createElement("div");
-     c.className="confetti";
-     c.style.left=Math.random()*100+"vw";
-     c.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
-     c.style.animationDuration=(Math.random()*2+2)+"s";
-     document.body.appendChild(c);
-     setTimeout(()=>c.remove(),4000);
-   }
- },700);
+ confettiLoop=setInterval(()=>{
+  for(let i=0;i<8;i++){
+   const c=document.createElement("div");
+   c.className="confetti";
+   c.style.left=Math.random()*100+"vw";
+   c.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
+   c.style.animationDuration=(Math.random()*2+2)+"s";
+   document.body.appendChild(c);
+   setTimeout(()=>c.remove(),4000);
+  }
+ },700);
 }
 
 </script>
