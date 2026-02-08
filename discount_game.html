@@ -96,7 +96,7 @@ button:disabled{background:#999;}
 
 <div class="overlay">
 
-<h2>Enter Mobile Number</h2>
+<h2 id="phoneTitle">Enter Mobile Number</h2>
 <input id="phone" placeholder="10-digit mobile number" maxlength="10">
 <button id="verifyBtn" onclick="verifyPhone()">Continue</button>
 
@@ -168,6 +168,7 @@ function verifyPhone(){
    }else{
      document.getElementById("phone").style.display="none";
      document.getElementById("verifyBtn").style.display="none";
+     document.getElementById("phoneTitle").style.display="none";
      document.getElementById("game").style.display="block";
    }
  });
