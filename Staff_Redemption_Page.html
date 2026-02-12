@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staff Coupon Redeem</title>
+
+<style>
+body{
+  font-family: Arial;
+  background:#111;
+  color:white;
+  text-align:center;
+  padding:30px;
+}
+
+h1{font-size:26px;}
+
+input,button{
+  font-size:22px;
+  padding:15px;
+  border-radius:10px;
+  border:none;
+  margin:10px;
+  width:90%;
+  max-width:350px;
+}
+
+button{
+  background:limegreen;
+  font-weight:bold;
+}
+
+.msg{
+  font-size:20px;
+  margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Staff Order Redeem</h1>
+
+<input id="phone" placeholder="Customer Mobile Number">
+
+<br>
+
+<button id="redeemBtn" onclick="redeem()">Redeem Order</button>
+
+<div class="msg" id="msg"></div>
+
+<script>
+
+const SCRIPT_URL="PASTE_SCRIPT_URL_HERE";
+
+let locked=false;
+
+function redeem(){
+
+ if(locked) return;
+
+ const phone=document.getElementById("phone").value.trim();
+
+ if(phone.length<8){
+   alert("Enter valid mobile");
+   return;
+ }
+
+ locked=true;
+ document.getElementById("redeemBtn").innerText="Processing...";
+
+ fetch(`${SCRIPT_URL}?action=redeemCoupon&phone=${phone}`)
+ .then(r=>r.text())
+ .then(res=>{
+
+   if(res==="REDEEMED"){
+     document.getElementById("msg").innerText=
+       "Order confirmed. Loyalty stamp added.";
+   }else{
+     document.getElementById("msg").innerText=
+       "Error. Try again.";
+   }
+
+   locked=false;
+   document.getElementById("redeemBtn").innerText="Redeem Order";
+
+ });
+}
+
+</script>
+
+</body>
+</html>
