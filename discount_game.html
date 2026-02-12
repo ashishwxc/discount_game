@@ -1,262 +1,243 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Spin & Win</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <style>
+
 body{
- margin:0;
- min-height:100vh;
- display:flex;
- justify-content:center;
- align-items:center;
- background:linear-gradient(135deg,#ffecd2,#fcb69f);
- font-family:Arial;
- overflow:hidden;
+margin:0;
+font-family:Arial;
+background:black;
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+height:100vh;
 }
 
-.overlay{
- background:#fff;
- padding:40px;
- border-radius:20px;
- text-align:center;
- width:90%;
- max-width:460px;
- transform:scale(1.25);
- box-shadow:0 10px 35px rgba(0,0,0,.25);
+.container{
+text-align:center;
+padding:40px;
+width:90%;
+max-width:420px;
 }
 
-input{
- padding:16px;
- width:92%;
- font-size:18px;
- margin-bottom:15px;
+input,button{
+width:100%;
+padding:18px;
+font-size:22px;
+border-radius:10px;
+border:none;
+margin-top:12px;
 }
 
 button{
- padding:15px 32px;
- font-size:18px;
- border:none;
- border-radius:8px;
- background:#27ae60;
- color:white;
- cursor:pointer;
+background:#ff9800;
+color:black;
+font-weight:bold;
+cursor:pointer;
 }
-
-button:disabled{background:#aaa;}
 
 #slot{
- font-size:58px;
- margin:22px 0;
+font-size:50px;
+margin:20px 0;
 }
 
-#result,#code,#note{
- font-size:22px;
- font-weight:bold;
- opacity:0;
- margin-top:12px;
+#result{
+font-size:28px;
+margin-top:15px;
 }
 
-#note{
- font-size:16px;
- color:#b00000;
+#code{
+font-size:24px;
+color:#00ffea;
+margin-top:10px;
 }
 
-.win{
- animation:pop .8s ease forwards,glow 1.5s infinite;
+.notice{
+margin-top:15px;
+color:#ffd700;
+font-size:16px;
 }
 
-@keyframes pop{
- 0%{transform:scale(.5);opacity:0}
- 60%{transform:scale(1.3);opacity:1}
- 100%{transform:scale(1);opacity:1}
-}
-@keyframes glow{
- 0%{text-shadow:0 0 5px gold}
- 50%{text-shadow:0 0 20px gold}
- 100%{text-shadow:0 0 5px gold}
+/* Loyalty */
+
+#loyaltyCard{
+margin-top:25px;
+padding:20px;
+border-radius:14px;
+background:#fff3d6;
+color:black;
+border:2px dashed #ff9800;
 }
 
-.confetti{
- position:fixed;
- width:10px;
- height:10px;
- top:-10px;
- animation:fall linear forwards;
+.stampGrid{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:10px;
+margin-top:12px;
 }
-@keyframes fall{
- to{transform:translateY(110vh) rotate(360deg);opacity:0}
+
+.stamp{
+width:55px;
+height:55px;
+border-radius:50%;
+background:#ddd;
+background-size:contain;
+background-repeat:no-repeat;
+background-position:center;
+border:2px solid #bbb;
 }
+
+.stamp.filled{
+background-image:url("https://github.com/ashishwxc/discount_game/blob/main/logo.png");
+background-color:#fff;
+border-color:#ff9800;
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="overlay">
+<div class="container">
 
-<h2 id="phoneTitle">Enter Mobile Number</h2>
-<input id="phone" placeholder="10-digit mobile number" maxlength="10">
-<button id="verifyBtn" onclick="verifyPhone()">Continue</button>
+<div id="step1">
+<h2>Enter Mobile Number</h2>
+<input id="phone" type="tel" placeholder="10-digit mobile number">
+<button onclick="submitPhone()">Continue</button>
+</div>
 
-<div id="game" style="display:none">
-
-<h2> Spin & Win </h2>
-<button id="playBtn" onclick="play()">Get Discount</button>
-
-<div id="slot"> </div>
+<div id="step2" style="display:none;">
+<button onclick="play()">🎰 Reveal My Reward</button>
+<div id="slot">1 2 3</div>
 <div id="result"></div>
 <div id="code"></div>
-<div id="note"></div>
 
+<div class="notice">
+Do not refresh or leave the screen.<br>
+Take a screenshot and share it while placing the order.
+</div>
+
+<div id="loyaltyCard">
+<b>💳 UMAMI & AROMA LOYALTY CARD</b>
+<div id="stampText"></div>
+<div class="stampGrid" id="stamps"></div>
+<div style="margin-top:10px;">Free Dish at 10 Stamps 🎁</div>
 </div>
 
 </div>
 
-<audio id="winSound" preload="auto">
-<source src="win-sound.mp3" type="audio/mpeg">
-</audio>
+</div>
+
+<audio id="winSound" src="win.mp3"></audio>
 
 <script>
 
-const API_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
-
-/* ===== DEVICE DETECTION ===== */
-
-function getDeviceType(){
- const ua=navigator.userAgent;
- if(/android/i.test(ua)) return "Android";
- if(/iPad|iPhone|iPod/.test(ua)) return "Apple iOS";
- return "Desktop / Other";
-}
-
-/* ===== REWARDS ===== */
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
 
 const COMMON=[
- {text:"10% OFF",code:"UA-7B3M9Q"},
- {text:"12% OFF",code:"UA-9Q4L2X"},
- {text:"15% OFF",code:"UA-8L6K3M"},
- {text:" Free Homemade Iced Tea",code:"UA-T9F3KQ"},
- {text:" Free Iced Americano",code:"UA-A7M2QX"}
+{text:"10% OFF",code:"UA-7B3M9Q"},
+{text:"11% OFF",code:"UA-K8F2A6"},
+{text:"12% OFF",code:"UA-9Q4L2X"},
+{text:"13% OFF",code:"UA-M5A7C8"},
+{text:"14% OFF",code:"UA-2XQ9F4"},
+{text:"15% OFF",code:"UA-8L6K3M"},
+{text:"🍹 Free Homemade Iced Tea",code:"UA-T9F3KQ"},
+{text:"☕ Free Iced Americano",code:"UA-A7M2QX"}
 ];
 
 const RARE=[
- {text:"16% OFF",code:"UA-F4Q7A9"},
- {text:"18% OFF",code:"UA-Q9M5F2"},
- {text:"20% OFF",code:"UA-3F8Q9X"},
- {text:" Buy 2 Beverages Get 1 Free",code:"UA-2B9MFX"},
- {text:" Free Peri Peri Fries",code:"UA-PF7Q2L"},
- {text:" Buy Any Burger + Get Fries Free",code:"UA-BF9Q2K"},
- {text:" Buy Any Sandwich + Get Soft Drink Free",code:"UA-SD7M3Q"},
- {text:" Get Free Fries",code:"UA-FR6K2Q"}
+{text:"16% OFF",code:"UA-F4Q7A9"},
+{text:"17% OFF",code:"UA-6C2X8L"},
+{text:"18% OFF",code:"UA-Q9M5F2"},
+{text:"19% OFF",code:"UA-A7L4K6"},
+{text:"20% OFF",code:"UA-3F8Q9X"},
+{text:"🍔 Buy Any Burger + Fries Free",code:"UA-BF7KQ2"},
+{text:"🥪 Buy Any Sandwich + Drink Free",code:"UA-SD8FQ2"},
+{text:"🥤 Buy 2 Beverages Get 1 Free",code:"UA-B23FQ9"},
+{text:"🍟 Free Fries",code:"UA-FR5QK2"}
 ];
 
-const ULTRA_RARE=[
- {text:" Buy 1 Get 1 Free Pasta",code:"UA-PB7X2L"}
+const ULTRA=[
+{text:"🍝 Buy 1 Get 1 Free Pasta",code:"UA-PB7X2L"}
 ];
 
-/* ===== PHONE VERIFY ===== */
+function submitPhone(){
 
-let phone="";
+const phone=document.getElementById("phone").value;
 
-function verifyPhone(){
+fetch(SCRIPT_URL+"?phone="+phone+"&device="+getDevice())
+.then(r=>r.text())
+.then(res=>{
 
- phone=document.getElementById("phone").value.trim();
-
- if(!/^[0-9]{10}$/.test(phone)){
-   alert("Enter valid 10-digit number");
-   return;
- }
-
- const device=getDeviceType();
-
- fetch(API_URL+"?phone="+phone+"&device="+device)
- .then(r=>r.text())
- .then(res=>{
-   if(res==="ALREADY_USED"){
-     alert("Already played today");
-   }else{
-     document.getElementById("phone").style.display="none";
-     document.getElementById("verifyBtn").style.display="none";
-     document.getElementById("phoneTitle").style.display="none";
-     document.getElementById("game").style.display="block";
-   }
- });
+if(res=="ALREADY_USED"){
+alert("You have already played today.");
+return;
 }
 
-/* ===== GAME ===== */
+document.getElementById("step1").style.display="none";
+document.getElementById("step2").style.display="block";
+
+const p=res.split("|");
+drawStamps(parseInt(p[1]));
+
+});
+
+}
 
 function play(){
- document.getElementById("playBtn").disabled=true;
- spin();
+
+let roll=Math.random()*100;
+let prize;
+
+if(roll<60){
+ prize=COMMON[Math.floor(Math.random()*COMMON.length)];
+}
+else if(roll<90){
+ prize=RARE[Math.floor(Math.random()*RARE.length)];
+}
+else{
+ prize=ULTRA[Math.floor(Math.random()*ULTRA.length)];
 }
 
-function spin(){
- let spins=25;
+let count=0;
+const anim=setInterval(()=>{
+ document.getElementById("slot").innerText=
+ Math.floor(Math.random()*9)+" "+
+ Math.floor(Math.random()*9)+" "+
+ Math.floor(Math.random()*9);
+ count++;
+ if(count>15){
+  clearInterval(anim);
+  document.getElementById("slot").innerText="🎉 🎉 🎉";
+  document.getElementById("result").innerText=prize.text;
+  document.getElementById("code").innerText=prize.code;
+  document.getElementById("winSound").play();
+  confetti({spread:120});
+ }
+},100);
 
- const interval=setInterval(()=>{
-  document.getElementById("slot").innerText=
-   Math.floor(Math.random()*50)+1;
-  spins--;
-  if(spins===0){
-    clearInterval(interval);
-    showWin();
-  }
- },100);
 }
 
-/* ===== PROBABILITY ===== */
-
-function getReward(){
- const chance=Math.random()*100;
- if(chance<60) return COMMON[Math.floor(Math.random()*COMMON.length)];
- if(chance<90) return RARE[Math.floor(Math.random()*RARE.length)];
- return ULTRA_RARE[Math.floor(Math.random()*ULTRA_RARE.length)];
+function drawStamps(c){
+const box=document.getElementById("stamps");
+box.innerHTML="";
+document.getElementById("stampText").innerText=c+" / 10 Stamps Collected";
+for(let i=1;i<=10;i++){
+ const d=document.createElement("div");
+ d.className="stamp";
+ if(i<=c) d.classList.add("filled");
+ box.appendChild(d);
+}
 }
 
-/* ===== WIN ===== */
-
-function showWin(){
-
- const reward=getReward();
-
- document.getElementById("slot").innerText=reward.text;
- document.getElementById("result").innerText=" YOU WON "+reward.text;
- document.getElementById("code").innerText="CODE: "+reward.code;
-
- document.getElementById("note").innerText=
- "Do not refresh or leave the screen.\nTake a screenshot and share it while placing the order.";
-
- document.getElementById("result").classList.add("win");
- document.getElementById("result").style.opacity=1;
- document.getElementById("code").style.opacity=1;
- document.getElementById("note").style.opacity=1;
-
- const sound=document.getElementById("winSound");
- sound.currentTime=0;
- sound.play();
-
- startConfetti();
-}
-
-/* ===== CONFETTI ===== */
-
-let confettiLoop=null;
-
-function startConfetti(){
- if(confettiLoop) return;
-
- confettiLoop=setInterval(()=>{
-  for(let i=0;i<8;i++){
-   const c=document.createElement("div");
-   c.className="confetti";
-   c.style.left=Math.random()*100+"vw";
-   c.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
-   c.style.animationDuration=(Math.random()*2+2)+"s";
-   document.body.appendChild(c);
-   setTimeout(()=>c.remove(),4000);
-  }
- },700);
+function getDevice(){
+return /android/i.test(navigator.userAgent)?"Android":
+/iPhone|iPad|iPod/i.test(navigator.userAgent)?"Apple":"Other";
 }
 
 </script>
