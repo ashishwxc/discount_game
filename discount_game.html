@@ -1,89 +1,129 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<meta charset="UTF-8">
+<title>Umami & Aroma Rewards</title>
 
 <style>
-
 body{
 margin:0;
-font-family:Arial;
-background:black;
-color:white;
+min-height:100vh;
 display:flex;
-align-items:center;
 justify-content:center;
-height:100vh;
+align-items:center;
+background:linear-gradient(135deg,#ffecd2,#fcb69f);
+font-family:Arial,sans-serif;
 }
 
 .container{
-text-align:center;
-padding:40px;
-width:90%;
+background:white;
+padding:50px 40px;
+border-radius:18px;
 max-width:420px;
+width:95%;
+text-align:center;
+box-shadow:0 8px 30px rgba(0,0,0,.25);
 }
+
+h1{margin-top:0;}
 
 input,button{
 width:100%;
-padding:18px;
-font-size:22px;
-border-radius:10px;
-border:none;
-margin-top:12px;
+padding:14px;
+margin-top:14px;
+font-size:18px;
+border-radius:8px;
+border:1px solid #ccc;
 }
 
 button{
-background:#ff9800;
-color:black;
-font-weight:bold;
+background:#ff7a00;
+color:white;
+border:none;
 cursor:pointer;
 }
 
+button:disabled{background:#aaa;}
+
 #slot{
-font-size:50px;
-margin:20px 0;
+font-size:46px;
+margin-top:25px;
+min-height:50px;
 }
 
 #result{
 font-size:28px;
-margin-top:15px;
-}
-
-#code{
-font-size:24px;
-color:#00ffea;
+font-weight:bold;
+color:green;
 margin-top:10px;
 }
 
-.notice{
-margin-top:15px;
-color:#ffd700;
-font-size:16px;
+#code{
+font-size:20px;
+margin-top:8px;
+font-weight:bold;
 }
 
-/* Loyalty */
+.warning{
+margin-top:14px;
+font-size:14px;
+color:#b00000;
+font-weight:bold;
+}
+
+.win{
+animation:pop .8s ease forwards, glow 1.5s infinite;
+}
+
+@keyframes pop{
+0%{transform:scale(.5);opacity:0;}
+60%{transform:scale(1.3);opacity:1;}
+100%{transform:scale(1);}
+}
+
+@keyframes glow{
+0%{text-shadow:0 0 5px gold;}
+50%{text-shadow:0 0 20px gold;}
+100%{text-shadow:0 0 5px gold;}
+}
+
+/* CONFETTI */
+.confetti{
+position:fixed;
+width:10px;
+height:10px;
+top:-10px;
+animation:fall linear forwards;
+}
+
+@keyframes fall{
+to{transform:translateY(110vh) rotate(360deg);opacity:0;}
+}
+
+/* LOYALTY CARD */
 
 #loyaltyCard{
-margin-top:25px;
-padding:20px;
-border-radius:14px;
+margin:30px auto;
+padding:25px;
+border-radius:16px;
 background:#fff3d6;
 color:black;
 border:2px dashed #ff9800;
+max-width:360px;
+text-align:center;
 }
 
 .stampGrid{
 display:grid;
 grid-template-columns:repeat(5,1fr);
-gap:10px;
-margin-top:12px;
+gap:14px;
+margin-top:18px;
+justify-items:center;
 }
 
 .stamp{
-width:55px;
-height:55px;
+width:60px;
+height:60px;
 border-radius:50%;
 background:#ddd;
 background-size:contain;
@@ -94,10 +134,9 @@ border:2px solid #bbb;
 
 .stamp.filled{
 background-image:url("https://github.com/ashishwxc/discount_game/blob/main/logo.png");
-background-color:#fff;
+background-color:white;
 border-color:#ff9800;
 }
-
 </style>
 </head>
 
@@ -105,19 +144,21 @@ border-color:#ff9800;
 
 <div class="container">
 
-<div id="step1">
-<h2>Enter Mobile Number</h2>
-<input id="phone" type="tel" placeholder="10-digit mobile number">
+<h1>🎉 Umami & Aroma Rewards 🎉</h1>
+
+<div id="phoneBox">
+<input id="phone" placeholder="Enter Mobile Number">
 <button onclick="submitPhone()">Continue</button>
 </div>
 
-<div id="step2" style="display:none;">
-<button onclick="play()">🎰 Reveal My Reward</button>
-<div id="slot">1 2 3</div>
+<div id="gameBox" style="display:none;">
+<button id="playBtn" onclick="startGame()">🎰 Tap To Reveal Reward</button>
+
+<div id="slot">🎰</div>
 <div id="result"></div>
 <div id="code"></div>
 
-<div class="notice">
+<div class="warning">
 Do not refresh or leave the screen.<br>
 Take a screenshot and share it while placing the order.
 </div>
@@ -131,13 +172,16 @@ Take a screenshot and share it while placing the order.
 
 </div>
 
-</div>
-
 <audio id="winSound" src="win.mp3"></audio>
+
+</div>
 
 <script>
 
+/* 🔗 PASTE GOOGLE SCRIPT URL */
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
+
+/* REWARDS */
 
 const COMMON=[
 {text:"10% OFF",code:"UA-7B3M9Q"},
@@ -146,7 +190,7 @@ const COMMON=[
 {text:"13% OFF",code:"UA-M5A7C8"},
 {text:"14% OFF",code:"UA-2XQ9F4"},
 {text:"15% OFF",code:"UA-8L6K3M"},
-{text:"🍹 Free Homemade Iced Tea",code:"UA-T9F3KQ"},
+{text:"🍹 Free Iced Tea",code:"UA-T9F3KQ"},
 {text:"☕ Free Iced Americano",code:"UA-A7M2QX"}
 ];
 
@@ -156,88 +200,121 @@ const RARE=[
 {text:"18% OFF",code:"UA-Q9M5F2"},
 {text:"19% OFF",code:"UA-A7L4K6"},
 {text:"20% OFF",code:"UA-3F8Q9X"},
-{text:"🍔 Buy Any Burger + Fries Free",code:"UA-BF7KQ2"},
-{text:"🥪 Buy Any Sandwich + Drink Free",code:"UA-SD8FQ2"},
-{text:"🥤 Buy 2 Beverages Get 1 Free",code:"UA-B23FQ9"},
-{text:"🍟 Free Fries",code:"UA-FR5QK2"}
+{text:"Buy Any Burger + Get Fries Free",code:"UA-BF7Q2M"},
+{text:"Buy Any Sandwich + Get Soft Drink Free",code:"UA-SD8M2Q"},
+{text:"Buy 2 Beverages Get 1 Free",code:"UA-B2G9KQ"},
+{text:"Get Free Fries",code:"UA-FR5M2Q"}
 ];
 
 const ULTRA=[
 {text:"🍝 Buy 1 Get 1 Free Pasta",code:"UA-PB7X2L"}
 ];
 
+let phone="";
+let loyalty=0;
+
 function submitPhone(){
 
-const phone=document.getElementById("phone").value;
+phone=document.getElementById("phone").value.trim();
 
-fetch(SCRIPT_URL+"?phone="+phone+"&device="+getDevice())
-.then(r=>r.text())
-.then(res=>{
-
-if(res=="ALREADY_USED"){
-alert("You have already played today.");
+if(phone.length<8){
+alert("Enter valid phone number");
 return;
 }
 
-document.getElementById("step1").style.display="none";
-document.getElementById("step2").style.display="block";
-
+fetch(SCRIPT_URL+"?phone="+phone+"&device="+navigator.userAgent)
+.then(r=>r.text())
+.then(res=>{
+if(res==="ALREADY_USED"){
+alert("Already played today!");
+}else{
 const p=res.split("|");
-drawStamps(parseInt(p[1]));
-
+loyalty=parseInt(p[1]);
+document.getElementById("phoneBox").style.display="none";
+document.getElementById("gameBox").style.display="block";
+drawStamps(loyalty);
+}
 });
-
 }
 
-function play(){
+/* GAME */
 
-let roll=Math.random()*100;
-let prize;
-
-if(roll<60){
- prize=COMMON[Math.floor(Math.random()*COMMON.length)];
-}
-else if(roll<90){
- prize=RARE[Math.floor(Math.random()*RARE.length)];
-}
-else{
- prize=ULTRA[Math.floor(Math.random()*ULTRA.length)];
+function startGame(){
+document.getElementById("playBtn").disabled=true;
+spin();
 }
 
-let count=0;
-const anim=setInterval(()=>{
- document.getElementById("slot").innerText=
- Math.floor(Math.random()*9)+" "+
- Math.floor(Math.random()*9)+" "+
- Math.floor(Math.random()*9);
- count++;
- if(count>15){
-  clearInterval(anim);
-  document.getElementById("slot").innerText="🎉 🎉 🎉";
-  document.getElementById("result").innerText=prize.text;
-  document.getElementById("code").innerText=prize.code;
-  document.getElementById("winSound").play();
-  confetti({spread:120});
- }
-},100);
+function spin(){
+let spins=25;
+const slot=document.getElementById("slot");
 
+const i=setInterval(()=>{
+slot.innerText=Math.floor(Math.random()*50)+1+"%";
+spins--;
+if(spins==0){
+clearInterval(i);
+showWin();
 }
+},80);
+}
+
+function pickReward(){
+const r=Math.random()*100;
+if(r<60) return COMMON;
+if(r<90) return RARE;
+return ULTRA;
+}
+
+function showWin(){
+
+const pool=pickReward();
+const prize=pool[Math.floor(Math.random()*pool.length)];
+
+document.getElementById("slot").innerText=prize.text;
+document.getElementById("result").innerText="🎊 YOU WON!";
+document.getElementById("code").innerText="CODE: "+prize.code;
+
+document.getElementById("winSound").play();
+document.getElementById("result").classList.add("win");
+
+confetti();
+}
+
+/* CONFETTI LOOP */
+
+function confetti(){
+setInterval(()=>{
+for(let i=0;i<8;i++){
+const c=document.createElement("div");
+c.className="confetti";
+c.style.left=Math.random()*100+"vw";
+c.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
+c.style.animationDuration=(Math.random()*2+2)+"s";
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),4000);
+}
+},700);
+}
+
+/* LOYALTY */
 
 function drawStamps(c){
+
 const box=document.getElementById("stamps");
 box.innerHTML="";
-document.getElementById("stampText").innerText=c+" / 10 Stamps Collected";
-for(let i=1;i<=10;i++){
- const d=document.createElement("div");
- d.className="stamp";
- if(i<=c) d.classList.add("filled");
- box.appendChild(d);
-}
-}
 
-function getDevice(){
-return /android/i.test(navigator.userAgent)?"Android":
-/iPhone|iPad|iPod/i.test(navigator.userAgent)?"Apple":"Other";
+let msg=c+" / 10 Stamps Collected";
+if(c>=5 && c<10) msg+=" — 🎉 Halfway There!";
+if(c==0) msg="Start Collecting Stamps!";
+
+document.getElementById("stampText").innerText=msg;
+
+for(let i=1;i<=10;i++){
+const d=document.createElement("div");
+d.className="stamp";
+if(i<=c) d.classList.add("filled");
+box.appendChild(d);
+}
 }
 
 </script>
