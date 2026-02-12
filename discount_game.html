@@ -5,6 +5,7 @@
 <title>Umami & Aroma Rewards</title>
 
 <style>
+
 body{
 margin:0;
 min-height:100vh;
@@ -46,7 +47,9 @@ border:none;
 cursor:pointer;
 }
 
-button:disabled{background:#aaa;}
+button:disabled{
+background:#aaa;
+}
 
 #slot{
 font-size:46px;
@@ -74,6 +77,8 @@ color:#b00000;
 font-weight:bold;
 }
 
+/* WIN ANIMATION */
+
 .win{
 animation:pop .8s ease forwards, glow 1.5s infinite;
 }
@@ -91,6 +96,7 @@ animation:pop .8s ease forwards, glow 1.5s infinite;
 }
 
 /* CONFETTI */
+
 .confetti{
 position:fixed;
 width:10px;
@@ -100,7 +106,10 @@ animation:fall linear forwards;
 }
 
 @keyframes fall{
-to{transform:translateY(110vh) rotate(360deg);opacity:0;}
+to{
+transform:translateY(110vh) rotate(360deg);
+opacity:0;
+}
 }
 
 /* LOYALTY CARD */
@@ -110,7 +119,6 @@ margin:30px auto;
 padding:25px;
 border-radius:16px;
 background:#fff3d6;
-color:black;
 border:2px dashed #ff9800;
 max-width:360px;
 text-align:center;
@@ -129,17 +137,18 @@ width:60px;
 height:60px;
 border-radius:50%;
 background:#ddd;
-background-size:contain;
-background-repeat:no-repeat;
-background-position:center;
 border:2px solid #bbb;
 }
 
 .stamp.filled{
-background-image:url("https://github.com/ashishwxc/discount_game/blob/main/logo.png");
+background-image:url("https://ashishwxc.github.io/discount_game/logo.png");
+background-size:contain;
+background-repeat:no-repeat;
+background-position:center;
 background-color:white;
 border-color:#ff9800;
 }
+
 </style>
 </head>
 
@@ -182,7 +191,7 @@ Take a screenshot and share it while placing the order.
 
 <script>
 
-/* 🔗 PASTE YOUR GOOGLE SCRIPT WEB APP URL */
+/* 🔗 PASTE GOOGLE SCRIPT WEB APP URL */
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
 
 /* REWARDS */
@@ -243,9 +252,6 @@ document.getElementById("gameBox").style.display="block";
 
 drawStamps(loyalty);
 
-})
-.catch(err=>{
-alert("Connection error. Check Script URL.");
 });
 }
 
@@ -333,5 +339,3 @@ box.appendChild(d);
 
 </body>
 </html>
-
-
