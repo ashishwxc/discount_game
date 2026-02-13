@@ -1,138 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Staff Coupon Redeem</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{
-  font-family: Arial, sans-serif;
-  background:#f2f2f2;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+margin:0;
+background:#111;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+font-family:Arial;
 }
 
-.card{
-  background:#ffffff;
-  padding:30px;
-  border-radius:12px;
-  width:340px;
-  text-align:center;
-  box-shadow:0 6px 25px rgba(0,0,0,.15);
+.box{
+width:320px;
+text-align:center;
 }
 
-h2{
-  margin-top:0;
-  color:#222;
-}
-
-input{
-  width:100%;
-  padding:14px;
-  font-size:18px;
-  margin-top:12px;
-  border-radius:6px;
-  border:1px solid #ccc;
+input,button{
+width:100%;
+padding:12px;
+border-radius:8px;
+border:none;
+margin-top:10px;
+font-size:16px;
 }
 
 button{
-  width:100%;
-  padding:14px;
-  font-size:18px;
-  margin-top:18px;
-  background:#d4af37;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-button:disabled{
-  background:#999;
-}
-
-#msg{
-  margin-top:15px;
-  font-size:16px;
-  color:#333;
+background:linear-gradient(45deg,#ffd700,#ff9800);
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="box">
 
-<h2>STAFF REDEEM PANEL</h2>
+<h2>Staff Coupon Validation</h2>
 
-<div id="today"></div>
+<input id="mobile" placeholder="Customer Mobile">
+<input id="coupon" placeholder="Coupon Code">
 
-<input id="phone" placeholder="Customer Mobile Number">
-<input id="code" placeholder="Coupon Code">
+<button id="submitBtn">SUBMIT</button>
 
-<button id="btn" onclick="redeem()">REDEEM</button>
-
-<div id="msg"></div>
+<h3 id="msg"></h3>
 
 </div>
 
 <script>
 
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
 
-document.getElementById("today").innerText =
-"Date: " + new Date().toLocaleDateString();
+submitBtn.onclick=function(){
 
-function redeem(){
+ submitBtn.disabled=true;
 
- const phone=document.getElementById("phone").value.trim();
- const code=document.getElementById("code").value.trim();
- const btn=document.getElementById("btn");
- const msg=document.getElementById("msg");
-
- if(phone=="" || code==""){
-   alert("Enter phone and coupon code");
-   return;
- }
-
- btn.disabled=true;
- msg.innerText="Processing...";
-
- fetch(SCRIPT_URL,{
-   method:"POST",
-   body:new URLSearchParams({
-     action:"redeem",
-     phone:phone,
-     code:code
-   })
+ fetch(API_URL,{
+  method:"POST",
+  body:JSON.stringify({
+   action:"validate",
+   mobile:mobile.value,
+   coupon:coupon.value
+  })
  })
- .then(r=>r.text())
- .then(res=>{
-
-   if(res==="REDEEMED"){
-     msg.style.color="green";
-     msg.innerText="Redeemed Successfully ✔";
-   }
-   else if(res==="USED"){
-     msg.style.color="orange";
-     msg.innerText="Coupon Already Used Today";
-   }
-   else{
-     msg.style.color="red";
-     msg.innerText="Invalid Coupon";
-   }
-
-   btn.disabled=false;
- })
- .catch(()=>{
-   msg.style.color="red";
-   msg.innerText="Network Error";
-   btn.disabled=false;
+ .then(r=>r.json())
+ .then(d=>{
+  msg.innerText=d.status;
+  mobile.value="";
+  coupon.value="";
+  submitBtn.disabled=false;
  });
-
-}
+};
 
 </script>
 
