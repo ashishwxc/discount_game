@@ -7,8 +7,8 @@
 <style>
 body{
 margin:0;
-background:#000;
-color:#fff;
+background:#f5f5f5;
+color:#111;
 font-family:Arial;
 display:flex;
 justify-content:center;
@@ -19,32 +19,42 @@ min-height:100vh;
 .box{
 width:95%;
 max-width:480px;
-background:#111;
+background:#ffffff;
 padding:30px;
 border-radius:20px;
 text-align:center;
-box-shadow:0 0 25px gold;
+box-shadow:0 8px 30px rgba(0,0,0,.15);
 }
 
-h1{font-size:28px;}
+h1{font-size:28px;color:#222;}
 
 input,button{
 width:100%;
 padding:15px;
 font-size:18px;
 border-radius:10px;
-border:none;
+border:1px solid #ccc;
 margin-top:12px;
 }
 
-button{background:gold;font-weight:bold;}
-button:disabled{background:#555}
+button{
+background:#d4af37;
+color:#000;
+font-weight:bold;
+border:none;
+}
+
+button:disabled{background:#999}
 
 #slot{font-size:48px;margin:20px 0;}
-#result{font-size:26px;color:#00ff9c;}
+#result{font-size:26px;color:#00875a;}
 #code{font-size:20px;margin-top:10px;}
 
-.note{font-size:14px;color:#ffb;margin-top:15px;}
+.note{
+font-size:14px;
+color:#555;
+margin-top:15px;
+}
 
 .stamps{
 display:grid;
@@ -52,13 +62,16 @@ grid-template-columns:repeat(5,1fr);
 gap:10px;
 margin-top:15px;
 }
+
 .stamp{
 height:55px;
-border:2px dashed gold;
+border:2px dashed #d4af37;
 border-radius:8px;
+background:#fafafa;
 }
+
 .stamp.filled{
-background:radial-gradient(circle,gold,#b8860b);
+background:radial-gradient(circle,#ffd700,#b8860b);
 }
 </style>
 </head>
@@ -134,7 +147,7 @@ function start(){
  btn.disabled=true;
  btn.innerText="Checking...";
 
- fetch(`${SCRIPT_URL}?action=issueCoupon&phone=${phone}`)
+ fetch(`${SCRIPT_URL}?action=spin&phone=${phone}`)
  .then(r=>r.text())
  .then(res=>{
    if(res==="ALREADY_PLAYED"){
