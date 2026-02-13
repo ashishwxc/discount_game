@@ -14,6 +14,7 @@ display:flex;
 justify-content:center;
 align-items:center;
 min-height:100vh;
+overflow:hidden;
 }
 
 .box{
@@ -24,6 +25,8 @@ padding:30px;
 border-radius:20px;
 text-align:center;
 box-shadow:0 8px 30px rgba(0,0,0,.15);
+position:relative;
+z-index:2;
 }
 
 h1{font-size:28px;color:#222;}
@@ -73,6 +76,22 @@ background:#fafafa;
 .stamp.filled{
 background:radial-gradient(circle,#ffd700,#b8860b);
 }
+
+/* CONFETTI */
+.confetti{
+position:fixed;
+width:8px;
+height:8px;
+background:red;
+top:-10px;
+animation:fall 3s linear infinite;
+z-index:1;
+}
+
+@keyframes fall{
+0%{transform:translateY(-10px) rotate(0deg);}
+100%{transform:translateY(110vh) rotate(360deg);}
+}
 </style>
 </head>
 
@@ -80,19 +99,28 @@ background:radial-gradient(circle,#ffd700,#b8860b);
 
 <div class="box">
 
+<!-- PHONE SCREEN -->
 <div id="phoneScreen">
 <h1>Umami & Aroma Rewards</h1>
 <input id="phone" placeholder="Enter Mobile Number">
 <button id="startBtn" onclick="start()">Continue</button>
 </div>
 
+<!-- GAME SCREEN -->
 <div id="gameScreen" style="display:none">
 
 <div id="slot">🎰</div>
-<button onclick="spin()">Spin</button>
+
+<button id="spinBtn" onclick="spin()">Spin</button>
 
 <div id="result"></div>
 <div id="code"></div>
+
+<a id="waBtn" href="https://wa.me/c/918130173042" target="_blank" style="display:none;">
+<button style="background:#25D366;color:#000;margin-top:12px;">
+Place Order on WhatsApp
+</button>
+</a>
 
 <div class="note">
 Do not refresh or leave the screen.<br>
@@ -111,6 +139,8 @@ Take screenshot & show at counter.
 <script>
 
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
+
+/* -------- PRIZES -------- */
 
 const COMMON=[
 {text:"10% OFF",code:"UA-7B3M9Q"},
@@ -137,6 +167,9 @@ const ULTRA=[
 ];
 
 let phone="";
+let confettiInterval;
+
+/* -------- START -------- */
 
 function start(){
 
@@ -163,7 +196,12 @@ function start(){
  });
 }
 
+/* -------- SPIN -------- */
+
 function spin(){
+
+ const spinBtn=document.getElementById("spinBtn");
+ spinBtn.disabled=true;
 
  let prize=pickPrize();
 
@@ -172,7 +210,12 @@ function spin(){
  document.getElementById("code").innerText="Code: "+prize.code;
 
  document.getElementById("winSound").play();
+ document.getElementById("waBtn").style.display="block";
+
+ startConfetti();
 }
+
+/* -------- PRIZE PICK -------- */
 
 function pickPrize(){
  let r=Math.random()*100;
@@ -181,8 +224,9 @@ function pickPrize(){
  return ULTRA[Math.floor(Math.random()*ULTRA.length)];
 }
 
-function loadLoyalty(){
+/* -------- LOYALTY -------- */
 
+function loadLoyalty(){
  fetch(`${SCRIPT_URL}?action=getLoyalty&phone=${phone}`)
  .then(r=>r.text())
  .then(c=>{
@@ -194,6 +238,25 @@ function loadLoyalty(){
      s.appendChild(d);
    }
  });
+}
+
+/* -------- CONFETTI -------- */
+
+function startConfetti(){
+
+ if(confettiInterval) return;
+
+ confettiInterval=setInterval(()=>{
+   const c=document.createElement("div");
+   c.className="confetti";
+   c.style.left=Math.random()*100+"vw";
+   c.style.backgroundColor=
+     ["red","gold","green","blue","purple"]
+     [Math.floor(Math.random()*5)];
+   document.body.appendChild(c);
+
+   setTimeout(()=>c.remove(),3000);
+ },120);
 }
 
 </script>
