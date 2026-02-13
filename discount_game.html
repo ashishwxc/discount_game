@@ -1,200 +1,186 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Umami & Aroma Rewards</title>
 
 <style>
 body{
-  font-family: Arial, sans-serif;
-  background:#111;
-  color:white;
-  text-align:center;
-  padding:20px;
+margin:0;
+background:#000;
+color:#fff;
+font-family:Arial;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+
+.box{
+width:95%;
+max-width:480px;
+background:#111;
+padding:30px;
+border-radius:20px;
+text-align:center;
+box-shadow:0 0 25px gold;
 }
 
 h1{font-size:28px;}
 
 input,button{
-  font-size:22px;
-  padding:15px;
-  border-radius:10px;
-  border:none;
-  margin:10px;
+width:100%;
+padding:15px;
+font-size:18px;
+border-radius:10px;
+border:none;
+margin-top:12px;
 }
 
-button{
-  background:gold;
-  font-weight:bold;
+button{background:gold;font-weight:bold;}
+button:disabled{background:#555}
+
+#slot{font-size:48px;margin:20px 0;}
+#result{font-size:26px;color:#00ff9c;}
+#code{font-size:20px;margin-top:10px;}
+
+.note{font-size:14px;color:#ffb;margin-top:15px;}
+
+.stamps{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:10px;
+margin-top:15px;
 }
-
-#game,#result,#loyalty{display:none;}
-
-.card{
-  width:320px;
-  height:200px;
-  margin:20px auto;
-  background:#222;
-  border-radius:15px;
-  padding:15px;
-}
-
 .stamp{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  border:2px dashed gold;
-  display:inline-block;
-  margin:5px;
+height:55px;
+border:2px dashed gold;
+border-radius:8px;
 }
-
-.stamped{
-  background:radial-gradient(circle,gold,#b8860b);
-  box-shadow:0 0 10px gold;
+.stamp.filled{
+background:radial-gradient(circle,gold,#b8860b);
 }
 </style>
 </head>
 
 <body>
 
+<div class="box">
+
+<div id="phoneScreen">
 <h1>Umami & Aroma Rewards</h1>
-
-<div id="phoneBox">
 <input id="phone" placeholder="Enter Mobile Number">
-<br>
-<button onclick="startGame()">Continue</button>
+<button id="startBtn" onclick="start()">Continue</button>
 </div>
 
-<div id="game">
-<button onclick="playGame()">Reveal My Reward</button>
-</div>
+<div id="gameScreen" style="display:none">
 
-<div id="result">
-<h2 id="rewardText"></h2>
-<h3 id="rewardCode"></h3>
+<div id="slot">🎰</div>
+<button onclick="spin()">Spin</button>
 
-<p>
+<div id="result"></div>
+<div id="code"></div>
+
+<div class="note">
 Do not refresh or leave the screen.<br>
-Take a screenshot and share it while placing the order.
-</p>
-
-<button onclick="orderWhatsApp()">Place Order on WhatsApp</button>
+Take screenshot & show at counter.
 </div>
 
-<div id="loyalty">
-<h2>Loyalty Card</h2>
-<div class="card" id="card"></div>
+<h3>Loyalty Card</h3>
+<div class="stamps" id="stamps"></div>
+
 </div>
+
+</div>
+
+<audio id="winSound" src="win-sound.mp3"></audio>
 
 <script>
 
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
 
-let phone="";
-let locked=false;
-
-/* COMMON 60% */
 const COMMON=[
- {text:"10% OFF",code:"UA-7B3M9Q"},
- {text:"11% OFF",code:"UA-K8F2A6"},
- {text:"12% OFF",code:"UA-9Q4L2X"},
- {text:"13% OFF",code:"UA-M5A7C8"},
- {text:"14% OFF",code:"UA-2XQ9F4"},
- {text:"🍹 Free Iced Tea",code:"UA-T9F3KQ"},
- {text:"☕ Free Iced Americano",code:"UA-A7M2QX"},
- {text:"Buy Any Burger + Get Fries Free",code:"UA-BG7F2"},
- {text:"Buy Any Sandwich + Get Soft Drink Free",code:"UA-SD9X2"},
- {text:"Buy 2 Beverages Get 1 Free",code:"UA-B2G1"},
- {text:"Get Free Fries",code:"UA-FR33"}
+{text:"10% OFF",code:"UA-7B3M9Q"},
+{text:"11% OFF",code:"UA-K8F2A6"},
+{text:"12% OFF",code:"UA-9Q4L2X"},
+{text:"13% OFF",code:"UA-M5A7C8"},
+{text:"14% OFF",code:"UA-2XQ9F4"},
+{text:"🍹 Free Iced Tea",code:"UA-T9F3KQ"},
+{text:"☕ Free Iced Americano",code:"UA-A7M2QX"}
 ];
 
-/* RARE 30% */
 const RARE=[
- {text:"16% OFF",code:"UA-F4Q7A9"},
- {text:"17% OFF",code:"UA-6C2X8L"},
- {text:"18% OFF",code:"UA-Q9M5F2"},
- {text:"19% OFF",code:"UA-A7L4K6"},
- {text:"20% OFF",code:"UA-3F8Q9X"}
+{text:"16% OFF",code:"UA-F4Q7A9"},
+{text:"17% OFF",code:"UA-6C2X8L"},
+{text:"18% OFF",code:"UA-Q9M5F2"},
+{text:"Buy Burger + Fries Free",code:"UA-BG7K2"},
+{text:"Buy Sandwich + Drink Free",code:"UA-SD9M3"},
+{text:"Buy 2 Beverages Get 1",code:"UA-B21QX"},
+{text:"Get Free Fries",code:"UA-FR88Q"}
 ];
 
-/* ULTRA 10% */
 const ULTRA=[
- {text:"🍝 Buy 1 Get 1 Free Pasta",code:"UA-PB7X2L"}
+{text:"🍝 Buy 1 Get 1 Pasta",code:"UA-PB7X2L"}
 ];
 
-function startGame(){
+let phone="";
 
- if(locked) return;
+function start(){
+
  phone=document.getElementById("phone").value.trim();
+ if(phone.length<8){alert("Enter valid number");return;}
 
- if(phone.length<8){
-   alert("Enter valid mobile number");
-   return;
- }
-
- locked=true;
+ const btn=document.getElementById("startBtn");
+ btn.disabled=true;
+ btn.innerText="Checking...";
 
  fetch(`${SCRIPT_URL}?action=issueCoupon&phone=${phone}`)
  .then(r=>r.text())
  .then(res=>{
-    if(res==="ALREADY_PLAYED"){
-      alert("You already played today");
-      locked=false;
-      return;
-    }
+   if(res==="ALREADY_PLAYED"){
+     alert("Already used today.");
+     btn.disabled=false;
+     btn.innerText="Continue";
+     return;
+   }
 
-    document.getElementById("phoneBox").style.display="none";
-    document.getElementById("game").style.display="block";
+   document.getElementById("phoneScreen").style.display="none";
+   document.getElementById("gameScreen").style.display="block";
+   loadLoyalty();
  });
 }
 
-function playGame(){
+function spin(){
 
+ let prize=pickPrize();
+
+ document.getElementById("slot").innerText="🎉";
+ document.getElementById("result").innerText=prize.text;
+ document.getElementById("code").innerText="Code: "+prize.code;
+
+ document.getElementById("winSound").play();
+}
+
+function pickPrize(){
  let r=Math.random()*100;
- let prize;
-
- if(r<60){
-   prize=randomFrom(COMMON);
- }else if(r<90){
-   prize=randomFrom(RARE);
- }else{
-   prize=randomFrom(ULTRA);
- }
-
- document.getElementById("game").style.display="none";
- document.getElementById("result").style.display="block";
-
- document.getElementById("rewardText").innerText=prize.text;
- document.getElementById("rewardCode").innerText=prize.code;
-
- loadLoyalty();
-}
-
-function randomFrom(arr){
- return arr[Math.floor(Math.random()*arr.length)];
-}
-
-function orderWhatsApp(){
- window.open("https://wa.me/c/918130173042","_blank");
+ if(r<60) return COMMON[Math.floor(Math.random()*COMMON.length)];
+ if(r<90) return RARE[Math.floor(Math.random()*RARE.length)];
+ return ULTRA[Math.floor(Math.random()*ULTRA.length)];
 }
 
 function loadLoyalty(){
 
  fetch(`${SCRIPT_URL}?action=getLoyalty&phone=${phone}`)
  .then(r=>r.text())
- .then(count=>{
-   document.getElementById("loyalty").style.display="block";
-   drawCard(Number(count));
+ .then(c=>{
+   const s=document.getElementById("stamps");
+   s.innerHTML="";
+   for(let i=0;i<10;i++){
+     const d=document.createElement("div");
+     d.className="stamp"+(i<Number(c)?" filled":"");
+     s.appendChild(d);
+   }
  });
-}
-
-function drawCard(count){
-
- let html="";
- for(let i=0;i<10;i++){
-   html+=`<div class="stamp ${i<count?'stamped':''}"></div>`;
- }
- document.getElementById("card").innerHTML=html;
 }
 
 </script>
