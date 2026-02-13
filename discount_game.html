@@ -1,244 +1,277 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Spin & Win</title>
+<meta charset="UTF-8">
+<title>Umami & Aroma Rewards</title>
 
 <style>
 body{
 margin:0;
-background:#0d0d0d;
-color:white;
+min-height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
-font-family:Arial;
+background:linear-gradient(135deg,#1c1c1c,#3a2c1c);
+font-family:Arial, sans-serif;
+color:#fff;
 }
 
-.container{
-width:330px;
+.card{
+background:#fff;
+color:#000;
+padding:40px;
+border-radius:20px;
+width:95%;
+max-width:420px;
 text-align:center;
+box-shadow:0 10px 40px rgba(0,0,0,.5);
 }
 
-input{
+h1{margin-top:0;font-size:26px;}
+
+input,button{
 width:100%;
-padding:12px;
+padding:14px;
+font-size:18px;
 border-radius:8px;
 border:none;
-margin-bottom:10px;
-font-size:16px;
+margin-top:10px;
 }
 
 button{
-width:100%;
-padding:14px;
-border-radius:10px;
-border:none;
-font-size:18px;
-background:linear-gradient(45deg,#ffd700,#ff9800);
+background:#e09f3e;
+color:#000;
+font-weight:bold;
 cursor:pointer;
 }
 
 button:disabled{
-opacity:0.5;
+background:#aaa;
+cursor:not-allowed;
 }
 
-canvas{display:block;margin:auto;}
+#slot{
+font-size:50px;
+margin:25px 0;
+min-height:60px;
+}
+
+#result{
+font-size:26px;
+color:green;
+font-weight:bold;
+}
+
+#code{
+font-size:20px;
+margin-top:8px;
+font-weight:bold;
+}
+
+#msg{
+margin-top:10px;
+color:red;
+font-size:14px;
+}
+
+.win{
+animation:pop .8s ease forwards;
+}
+
+@keyframes pop{
+0%{transform:scale(.5);opacity:0;}
+60%{transform:scale(1.3);opacity:1;}
+100%{transform:scale(1);opacity:1;}
+}
+
+/* Loyalty Card */
+
+.loyalty{
+margin-top:25px;
+background:#222;
+padding:20px;
+border-radius:14px;
+}
 
 .stamps{
 display:grid;
 grid-template-columns:repeat(5,1fr);
-gap:6px;
-margin-top:12px;
+gap:12px;
+justify-items:center;
 }
 
 .stamp{
-height:40px;
-background:#333;
-border-radius:6px;
+width:50px;
+height:50px;
+border-radius:50%;
+border:2px dashed #555;
 }
 
-.filled{
-background:linear-gradient(45deg,#ffd700,#fff176);
+.stamp.filled{
+background:radial-gradient(circle at 30% 30%,#ffd700,#b8860b);
+border:none;
 box-shadow:0 0 10px gold;
+animation:pop .4s ease;
+}
+
+.progress{
+margin-top:10px;
+font-size:14px;
+color:#ddd;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="card">
 
-<h3>Enter Mobile Number</h3>
-<input id="mobile" type="tel" placeholder="10 digit number">
+<h1>Umami & Aroma Rewards</h1>
 
-<canvas id="wheel" width="280" height="280"></canvas>
+<div id="step1">
+<input id="phone" placeholder="Enter Mobile Number" maxlength="10">
+<button id="continueBtn" onclick="submitPhone()">Continue</button>
+</div>
 
-<button id="spinBtn">SPIN</button>
+<div id="step2" style="display:none">
 
-<h2 id="prizeText"></h2>
-<h3 id="couponText"></h3>
+<button id="playBtn" onclick="startGame()">🎁 Get My Reward</button>
 
-<a id="waBtn" target="_blank" style="display:none">
-<button>Order on WhatsApp</button>
-</a>
+<div id="slot">🎰</div>
+<div id="result"></div>
+<div id="code"></div>
 
+<p style="font-size:14px;margin-top:10px">
+Do not refresh or leave the screen.<br>
+Take a screenshot and share it while placing the order.
+</p>
+
+<div class="loyalty">
+<h3>Loyalty Card</h3>
 <div class="stamps" id="stamps"></div>
-<p id="progress"></p>
-
-<audio id="winSound" src="win.mp3"></audio>
+<div class="progress" id="progressText"></div>
+</div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<div id="msg"></div>
+
+</div>
+
+<audio id="sound" src="win-sound.mp3" preload="auto"></audio>
 
 <script>
 
-const API_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
-const WHATSAPP_LINK="https://wa.me/c/918130173042";
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
 
-/* -------- DEVICE + QR SCAN -------- */
+let phone="";
+let locked=false;
 
-function detectDevice(){
- if(/android/i.test(navigator.userAgent)) return "Android";
- if(/iphone|ipad|ipod/i.test(navigator.userAgent)) return "Apple";
- return "Other";
+/* REWARDS */
+const COMMON=[
+{t:"10% OFF",c:"UA-7B3M9Q"},
+{t:"11% OFF",c:"UA-K8F2A6"},
+{t:"12% OFF",c:"UA-9Q4L2X"},
+{t:"13% OFF",c:"UA-M5A7C8"},
+{t:"14% OFF",c:"UA-2XQ9F4"},
+{t:"15% OFF",c:"UA-8L6K3M"},
+{t:"🍹 Free Iced Tea",c:"UA-T9F3KQ"},
+{t:"☕ Free Iced Americano",c:"UA-A7M2QX"}
+];
+
+const RARE=[
+{t:"16% OFF",c:"UA-F4Q7A9"},
+{t:"17% OFF",c:"UA-6C2X8L"},
+{t:"18% OFF",c:"UA-Q9M5F2"},
+{t:"19% OFF",c:"UA-A7L4K6"},
+{t:"20% OFF",c:"UA-3F8Q9X"}
+];
+
+const ULTRA=[
+{t:"🍝 Buy 1 Get 1 Free Pasta",c:"UA-PB7X2L"}
+];
+
+/* SUBMIT PHONE */
+
+function submitPhone(){
+if(locked) return;
+phone=document.getElementById("phone").value.trim();
+if(phone.length!=10) return alert("Enter valid mobile");
+
+locked=true;
+document.getElementById("continueBtn").disabled=true;
+document.getElementById("continueBtn").innerText="Checking...";
+
+fetch(SCRIPT_URL,{
+method:"POST",
+body:new URLSearchParams({phone:phone})
+})
+.then(r=>r.text())
+.then(res=>{
+if(res==="ALREADY_USED"){
+document.getElementById("msg").innerText="You already played today.";
+}else{
+document.getElementById("step1").style.display="none";
+document.getElementById("step2").style.display="block";
+loadStamps(res);
+}
+})
+.catch(()=>alert("Connection error"));
 }
 
-window.onload=function(){
- fetch(API_URL,{
-  method:"POST",
-  body:JSON.stringify({
-   action:"scan",
-   mobile:"UNKNOWN",
-   device:detectDevice()
-  })
- });
-};
+/* GAME */
 
-/* -------- DISCOUNTS -------- */
+function startGame(){
+document.getElementById("playBtn").disabled=true;
 
-const COMMON=["10%","11%","12%","13%","14%","Free Iced Tea","Free Iced Americano","Free Mojito","Burger+Fries","Burger+Drink","Buy2Get1 Burger","Free Fries","Thali @129"];
-const RARE=["15%","16%","17%","18%","19%","20%"];
-const ULTRA=["Buy1Get1 Pasta","Buy2Get1 Bread"];
-
-/* -------- PROBABILITY -------- */
-
-function pickPrize(){
- let r=Math.random()*100;
- if(r<70) return COMMON[Math.floor(Math.random()*COMMON.length)];
- if(r<95) return RARE[Math.floor(Math.random()*RARE.length)];
- return ULTRA[Math.floor(Math.random()*ULTRA.length)];
+let spins=20;
+let s=setInterval(()=>{
+document.getElementById("slot").innerText=Math.floor(Math.random()*50)+"%";
+spins--;
+if(spins==0){
+clearInterval(s);
+showReward();
+}
+},80);
 }
 
-/* -------- WHEEL -------- */
+function showReward(){
 
-const canvas=document.getElementById("wheel");
-const ctx=canvas.getContext("2d");
+let roll=Math.random()*100;
+let reward;
 
-let angle=0,spinning=false;
+if(roll<60) reward=randomFrom(COMMON);
+else if(roll<90) reward=randomFrom(RARE);
+else reward=randomFrom(ULTRA);
 
-function drawWheel(){
- const slices=14;
- const slice=2*Math.PI/slices;
- ctx.clearRect(0,0,300,300);
+document.getElementById("slot").innerText=reward.t;
+document.getElementById("result").innerText="🎉 You Won!";
+document.getElementById("code").innerText=reward.c;
 
- for(let i=0;i<slices;i++){
-  ctx.beginPath();
-  ctx.fillStyle=i%2?"#ff9800":"#fbc02d";
-  ctx.moveTo(140,140);
-  ctx.arc(140,140,130,i*slice+angle,(i+1)*slice+angle);
-  ctx.fill();
- }
-}
-drawWheel();
-
-document.getElementById("spinBtn").onclick=startSpin;
-
-function startSpin(){
-
- if(spinning) return;
-
- if(mobile.value.length<10){
-  alert("Enter valid mobile");
-  return;
- }
-
- spinning=true;
- spinBtn.disabled=true;
-
- let speed=0.35;
-
- function animate(){
-  speed*=0.985;
-  angle+=speed;
-  drawWheel();
-  if(speed>0.002){
-   requestAnimationFrame(animate);
-  }else finishSpin();
- }
- animate();
+document.getElementById("sound").play();
 }
 
-/* -------- FINISH -------- */
-
-function finishSpin(){
-
- const prize=pickPrize();
-
- fetch(API_URL,{
-  method:"POST",
-  body:JSON.stringify({
-   action:"spin",
-   mobile:mobile.value,
-   discount:prize
-  })
- })
- .then(r=>r.json())
- .then(d=>{
-
-  prizeText.innerText="🎉 "+prize;
-  couponText.innerText=d.coupon;
-
-  waBtn.style.display="block";
-  waBtn.href=WHATSAPP_LINK;
-
-  winSound.play();
-
-  confetti({particleCount:200,spread:80});
-  setInterval(()=>confetti({particleCount:80,spread:60}),2500);
-
-  loadStamps();
- });
+function randomFrom(arr){
+return arr[Math.floor(Math.random()*arr.length)];
 }
 
-/* -------- STAMPS -------- */
+/* STAMPS */
 
-function loadStamps(){
+function loadStamps(count){
 
- fetch(API_URL,{
-  method:"POST",
-  body:JSON.stringify({
-   action:"fetchLoyalty",
-   mobile:mobile.value
-  })
- })
- .then(r=>r.json())
- .then(d=>{
+count=parseInt(count);
+const wrap=document.getElementById("stamps");
+wrap.innerHTML="";
 
-  stamps.innerHTML="";
+for(let i=1;i<=10;i++){
+let d=document.createElement("div");
+d.className="stamp";
+if(i<=count) d.classList.add("filled");
+wrap.appendChild(d);
+}
 
-  for(let i=0;i<10;i++){
-   let s=document.createElement("div");
-   s.className="stamp"+(i<d.stamps?" filled":"");
-   stamps.appendChild(s);
-  }
-
-  progress.innerText=
-   `${d.stamps}/10 collected — ${10-d.stamps} more orders to free dish`;
- });
+document.getElementById("progressText").innerText=
+count+" / 10 orders completed";
 }
 
 </script>
