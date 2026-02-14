@@ -13,6 +13,7 @@ justify-content:center;
 align-items:center;
 height:100vh;
 margin:0;
+text-align:center;
 }
 
 .box{
@@ -20,9 +21,10 @@ background:#fff;
 padding:25px;
 width:350px;
 border-radius:16px;
-text-align:center;
 box-shadow:0 10px 30px rgba(0,0,0,.3);
 }
+
+.hidden{display:none;}
 
 button{
 width:100%;
@@ -44,10 +46,11 @@ padding:10px;
 margin-top:10px;
 border-radius:6px;
 border:1px solid #ccc;
+text-align:center;
 }
 
 #slot{font-size:32px;margin:20px 0;}
-#result{font-size:20px;color:green;font-weight:bold;}
+#result{font-size:20px;color:green;font-weight:bold;white-space:pre-line;}
 
 .pinBox{
 background:#000;
@@ -66,6 +69,16 @@ margin-top:10px;
 
 <div class="box">
 
+<!-- STEP 1 -->
+<div id="stepMobile">
+<h2>Enter Your Mobile Number</h2>
+<input id="mobileInput" placeholder="e.g. 0501234567">
+<button id="continueBtn">Continue</button>
+</div>
+
+<!-- STEP 2 -->
+<div id="stepSpin" class="hidden">
+
 <h2>🎰 Spin & Win</h2>
 
 <button id="spinBtn">Spin</button>
@@ -73,13 +86,13 @@ margin-top:10px;
 <div id="slot">🎰</div>
 <div id="result"></div>
 
-<input id="mobileInput" placeholder="Enter Mobile Number">
+<div id="pinBox" class="pinBox hidden"></div>
 
-<div id="pinBox" class="pinBox" style="display:none"></div>
-
-<button id="waBtn" class="whatsapp" style="display:none">
+<button id="waBtn" class="whatsapp hidden">
 Order via WhatsApp
 </button>
+
+</div>
 
 </div>
 
@@ -109,16 +122,34 @@ const ULTRA=[
 {text:"🍝 Buy 1 Get 1 Pasta",code:"UA-PB7X2L"}
 ];
 
-// ===== SETTINGS =====
 const WHATSAPP_LINK="https://wa.me/c/918130173042";
 
 // ===== ELEMENTS =====
+const stepMobile=document.getElementById("stepMobile");
+const stepSpin=document.getElementById("stepSpin");
+const continueBtn=document.getElementById("continueBtn");
+const mobileInput=document.getElementById("mobileInput");
+
 const spinBtn=document.getElementById("spinBtn");
 const slot=document.getElementById("slot");
 const result=document.getElementById("result");
-const mobileInput=document.getElementById("mobileInput");
 const pinBox=document.getElementById("pinBox");
 const waBtn=document.getElementById("waBtn");
+
+let customerMobile="";
+let currentPIN="";
+let currentReward=null;
+
+// ===== STEP 1 =====
+continueBtn.onclick=()=>{
+if(mobileInput.value.length<8){
+alert("Enter valid mobile number");
+return;
+}
+customerMobile=mobileInput.value;
+stepMobile.classList.add("hidden");
+stepSpin.classList.remove("hidden");
+};
 
 // ===== SPIN =====
 spinBtn.onclick=()=>{
@@ -143,32 +174,26 @@ return ULTRA[Math.floor(Math.random()*ULTRA.length)];
 }
 
 function showWin(){
-let reward=pickReward();
-result.innerText="YOU WON: "+reward.text+"\nCODE: "+reward.code;
+currentReward=pickReward();
+result.innerText="YOU WON:\n"+currentReward.text+"\nCODE: "+currentReward.code;
 
-let pin=Math.floor(100000+Math.random()*900000);
+currentPIN=Math.floor(100000+Math.random()*900000).toString();
+pinBox.innerText="ORDER PIN: "+currentPIN;
+pinBox.classList.remove("hidden");
 
-pinBox.innerText="ORDER PIN: "+pin;
-pinBox.style.display="block";
-
-waBtn.style.display="block";
+waBtn.classList.remove("hidden");
 
 waBtn.onclick=()=>{
-if(mobileInput.value.length<8){
-alert("Enter valid mobile number");
-return;
-}
-
-localStorage.setItem("orderPIN",pin);
-localStorage.setItem("orderMobile",mobileInput.value);
+localStorage.setItem("orderPIN",currentPIN);
+localStorage.setItem("orderMobile",customerMobile);
 
 window.open(
 WHATSAPP_LINK+
 "?text="+encodeURIComponent(
-"Order Request\nReward: "+reward.text+
-"\nCoupon Code: "+reward.code+
-"\nPIN: "+pin+
-"\nMobile: "+mobileInput.value
+"Order Request\nReward: "+currentReward.text+
+"\nCoupon Code: "+currentReward.code+
+"\nPIN: "+currentPIN+
+"\nMobile: "+customerMobile
 )
 );
 };
