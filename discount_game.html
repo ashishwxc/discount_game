@@ -6,22 +6,21 @@
 
 <style>
 body{
+margin:0;
 font-family:Arial;
-background:linear-gradient(135deg,#ffecd2,#fcb69f);
+background:#ffffff;
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
-margin:0;
-text-align:center;
 }
 
 .card{
-background:#fff;
-padding:25px;
 width:360px;
-border-radius:16px;
-box-shadow:0 10px 30px rgba(0,0,0,.3);
+padding:25px;
+border-radius:14px;
+box-shadow:0 0 25px rgba(0,0,0,.15);
+text-align:center;
 }
 
 .hidden{display:none;}
@@ -30,18 +29,23 @@ input,button{
 width:100%;
 padding:12px;
 margin-top:10px;
-border-radius:8px;
-border:none;
 font-size:16px;
+border-radius:8px;
+border:1px solid #ccc;
+text-align:center;
 }
 
-input{text-align:center;border:1px solid #ccc;}
+button{
+background:#ff7a18;
+color:white;
+border:none;
+cursor:pointer;
+}
 
-button{background:#ff7a18;color:#fff;cursor:pointer;}
 button:disabled{background:#ccc;}
 
-#slot{font-size:32px;margin:20px 0;}
-.pin{background:#000;color:#fff;padding:10px;border-radius:8px;}
+#slot{font-size:40px;margin:20px 0;}
+.pinBox{background:black;color:white;padding:10px;border-radius:8px;}
 .whatsapp{background:#25D366;}
 </style>
 </head>
@@ -52,20 +56,20 @@ button:disabled{background:#ccc;}
 
 <!-- STEP 1 -->
 <div id="step1">
-<h2>Enter Mobile Number</h2>
+<h3>Enter Mobile Number</h3>
 <input id="mobileInput" placeholder="0501234567">
 <button id="continueBtn">Continue</button>
 </div>
 
 <!-- STEP 2 -->
 <div id="step2" class="hidden">
-<h2>🎰 Spin & Win</h2>
+<h3>Spin & Win</h3>
 <button id="spinBtn">Spin</button>
 
 <div id="slot">🎰</div>
 <div id="result"></div>
 
-<div id="pinBox" class="pin hidden"></div>
+<div id="pinBox" class="pinBox hidden"></div>
 
 <button id="waBtn" class="whatsapp hidden">
 Order via WhatsApp
@@ -79,23 +83,20 @@ Order via WhatsApp
 
 // ===== FIREBASE IMPORTS =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // ===== FIREBASE CONFIG =====
 const firebaseConfig = {
-  apiKey: "AIzaSyBHlfarr3B28oS-DUW9rxSqSKN3vQJ1Lts",
-  authDomain: "discount-1b512.firebaseapp.com",
-  projectId: "discount-1b512",
-  storageBucket: "discount-1b512.firebasestorage.app",
-  messagingSenderId: "697234366614",
-  appId: "1:697234366614:web:359ac579df5478dfc8a2b7",
-  measurementId: "G-LTVZTLXKTG"
+apiKey: "AIzaSyBHlfarr3B28oS-DUW9rxSqSKN3vQJ1Lts",
+authDomain: "discount-1b512.firebaseapp.com",
+projectId: "discount-1b512",
+storageBucket: "discount-1b512.firebasestorage.app",
+messagingSenderId: "697234366614",
+appId: "1:697234366614:web:359ac579df5478dfc8a2b7"
 };
 
-const app = initializeApp(firebaseConfig);
-getAnalytics(app);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
 // ===== COUPONS =====
 const COMMON=[
@@ -106,10 +107,10 @@ const COMMON=[
 {text:"14% OFF",code:"UA-2XQ9F4"},
 {text:"🍹 Free Iced Tea",code:"UA-T9F3KQ"},
 {text:"☕ Free Iced Americano",code:"UA-A7M2QX"},
-{text:"Buy Any Burger + Fries Free",code:"UA-BG7K2"},
-{text:"Buy Any Sandwich + Drink Free",code:"UA-SD9M3"},
+{text:"Buy Burger + Fries Free",code:"UA-BG7K2"},
+{text:"Buy Sandwich + Drink Free",code:"UA-SD9M3"},
 {text:"Buy 2 Beverages Get 1",code:"UA-B21QX"},
-{text:"Get Free Fries with your order",code:"UA-FR88Q"}
+{text:"Get Free Fries",code:"UA-FR88Q"}
 ];
 
 const RARE=[
@@ -120,7 +121,6 @@ const RARE=[
 
 const ULTRA=[
 {text:"🍝 Buy 1 Get 1 Pasta",code:"UA-PB7X2L"}
-{text:"🥤 Get 500ml Free Main", code:"UA-5KQ9Z2"}
 ];
 
 const WHATSAPP_LINK="https://wa.me/c/918130173042";
@@ -196,7 +196,7 @@ created:Date.now()
 });
 
 waBtn.onclick=()=>{
-window.open(
+window.location.href=
 WHATSAPP_LINK+
 "?text="+encodeURIComponent(
 "Order Request\nReward: "+reward.text+
@@ -212,4 +212,3 @@ WHATSAPP_LINK+
 
 </body>
 </html>
-
