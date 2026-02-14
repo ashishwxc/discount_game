@@ -1,75 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Staff Redeem</title>
+<meta charset="UTF-8">
+<title>Restaurant Confirmation</title>
 
 <style>
 body{
-background:#f5f5f5;
 font-family:Arial;
+background:#111;
+color:#fff;
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
+margin:0;
 }
 
-.box{
-background:#fff;
-padding:25px;
-width:300px;
+.panel{
+background:#222;
+padding:30px;
+width:320px;
 border-radius:12px;
 text-align:center;
-box-shadow:0 0 15px #ccc;
 }
 
 input,button{
 width:100%;
-padding:14px;
+padding:12px;
 margin-top:10px;
+border-radius:6px;
+border:none;
+font-size:16px;
 }
 
-button{background:gold;border:none;font-weight:bold;}
+button{
+background:#28a745;
+color:white;
+cursor:pointer;
+}
 </style>
 </head>
 
 <body>
 
-<div class="box">
+<div class="panel">
 
-<h3>Staff Redeem</h3>
+<h2>Confirm Order</h2>
 
-<input id="phone" placeholder="Customer Mobile">
-<input id="code" placeholder="Coupon Code">
+<input id="pinInput" placeholder="Enter PIN">
+<input id="mobileInput" placeholder="Enter Mobile">
 
-<button onclick="redeem()">Redeem</button>
+<button id="confirmBtn">Confirm</button>
 
 <div id="msg"></div>
 
 </div>
 
 <script>
+let pinInput=document.getElementById("pinInput");
+let mobileInput=document.getElementById("mobileInput");
+let msg=document.getElementById("msg");
 
-var SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
+document.getElementById("confirmBtn").onclick=()=>{
 
-function redeem(){
+let savedPin=localStorage.getItem("orderPIN");
+let savedMobile=localStorage.getItem("orderMobile");
 
- var phone=document.getElementById("phone").value.trim();
- var code=document.getElementById("code").value.trim();
+if(pinInput.value===savedPin && mobileInput.value===savedMobile){
 
- fetch(SCRIPT_URL,{
-   method:"POST",
-   body:new URLSearchParams({
-     action:"redeem",
-     phone:phone,
-     code:code
-   })
- })
- .then(r=>r.text())
- .then(res=>{
-   document.getElementById("msg").innerText=res;
- });
+let stamps=parseInt(localStorage.getItem("stamps")||"0");
+stamps++;
+if(stamps>10)stamps=10;
+localStorage.setItem("stamps",stamps);
+
+msg.innerText="✅ Order Confirmed. Stamp Added.";
+msg.style.color="lime";
+
+}else{
+msg.innerText="❌ Invalid PIN or Mobile";
+msg.style.color="red";
 }
-
+};
 </script>
 
 </body>
