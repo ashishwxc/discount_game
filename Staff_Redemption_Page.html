@@ -14,6 +14,7 @@ justify-content:center;
 align-items:center;
 height:100vh;
 margin:0;
+text-align:center;
 }
 
 .panel{
@@ -21,7 +22,6 @@ background:#222;
 padding:30px;
 width:320px;
 border-radius:12px;
-text-align:center;
 }
 
 input,button{
@@ -31,6 +31,7 @@ margin-top:10px;
 border-radius:6px;
 border:none;
 font-size:16px;
+text-align:center;
 }
 
 button{
@@ -48,38 +49,44 @@ cursor:pointer;
 <h2>Confirm Order</h2>
 
 <input id="pinInput" placeholder="Enter PIN">
-<input id="mobileInput" placeholder="Enter Mobile">
+<input id="mobileInput" placeholder="Enter Mobile Number">
 
-<button id="confirmBtn">Confirm</button>
+<button id="confirmBtn">Confirm Order</button>
 
 <div id="msg"></div>
 
 </div>
 
 <script>
-let pinInput=document.getElementById("pinInput");
-let mobileInput=document.getElementById("mobileInput");
-let msg=document.getElementById("msg");
+const pinInput=document.getElementById("pinInput");
+const mobileInput=document.getElementById("mobileInput");
+const msg=document.getElementById("msg");
 
 document.getElementById("confirmBtn").onclick=()=>{
 
 let savedPin=localStorage.getItem("orderPIN");
 let savedMobile=localStorage.getItem("orderMobile");
 
-if(pinInput.value===savedPin && mobileInput.value===savedMobile){
+if(pinInput.value===savedPin &&
+mobileInput.value===savedMobile){
 
 let stamps=parseInt(localStorage.getItem("stamps")||"0");
 stamps++;
 if(stamps>10)stamps=10;
 localStorage.setItem("stamps",stamps);
 
-msg.innerText="✅ Order Confirmed. Stamp Added.";
+msg.innerText="✅ Order Confirmed\nStamp Added!";
 msg.style.color="lime";
 
 }else{
 msg.innerText="❌ Invalid PIN or Mobile";
 msg.style.color="red";
 }
+
+// 🔄 RESET FIELDS
+pinInput.value="";
+mobileInput.value="";
+
 };
 </script>
 
