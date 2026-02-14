@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Restaurant Confirmation</title>
@@ -20,7 +20,7 @@ text-align:center;
 .panel{
 background:#222;
 padding:30px;
-width:320px;
+width:330px;
 border-radius:12px;
 }
 
@@ -49,7 +49,7 @@ cursor:pointer;
 <h2>Confirm Order</h2>
 
 <input id="pinInput" placeholder="Enter PIN">
-<input id="mobileInput" placeholder="Enter Mobile Number">
+<input id="mobileInput" placeholder="Enter Mobile">
 
 <button id="confirmBtn">Confirm Order</button>
 
@@ -57,37 +57,84 @@ cursor:pointer;
 
 </div>
 
-<script>
+<script type="module">
+
+// ===== FIREBASE IMPORTS =====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// ===== FIREBASE CONFIG =====
+const firebaseConfig = {
+  apiKey: "AIzaSyBHlfarr3B28oS-DUW9rxSqSKN3vQJ1Lts",
+  authDomain: "discount-1b512.firebaseapp.com",
+  projectId: "discount-1b512",
+  storageBucket: "discount-1b512.firebasestorage.app",
+  messagingSenderId: "697234366614",
+  appId: "1:697234366614:web:359ac579df5478dfc8a2b7",
+  measurementId: "G-LTVZTLXKTG"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ===== ELEMENTS =====
 const pinInput=document.getElementById("pinInput");
 const mobileInput=document.getElementById("mobileInput");
 const msg=document.getElementById("msg");
+const confirmBtn=document.getElementById("confirmBtn");
 
-document.getElementById("confirmBtn").onclick=()=>{
+// ===== CONFIRM =====
+confirmBtn.onclick=async ()=>{
 
-let savedPin=localStorage.getItem("orderPIN");
-let savedMobile=localStorage.getItem("orderMobile");
+let pin=pinInput.value.trim();
+let mobile=mobileInput.value.trim();
 
-if(pinInput.value===savedPin &&
-mobileInput.value===savedMobile){
+if(pin.length!==6 || mobile.length<8){
+msg.innerText="❌ Invalid format";
+msg.style.color="red";
+return;
+}
 
+const ref=doc(db,"orders",pin);
+const snap=await getDoc(ref);
+
+if(!snap.exists()){
+msg.innerText="❌ PIN not found";
+msg.style.color="red";
+return;
+}
+
+const data=snap.data();
+
+if(data.mobile!==mobile){
+msg.innerText="❌ Mobile does not match";
+msg.style.color="red";
+return;
+}
+
+if(data.used){
+msg.innerText="❌ PIN already used";
+msg.style.color="red";
+return;
+}
+
+// Mark PIN as used
+await updateDoc(ref,{used:true});
+
+// Add loyalty stamp (local device)
 let stamps=parseInt(localStorage.getItem("stamps")||"0");
 stamps++;
 if(stamps>10)stamps=10;
 localStorage.setItem("stamps",stamps);
 
-msg.innerText="✅ Order Confirmed\nStamp Added!";
+msg.innerText="✅ Order Confirmed & Stamp Added";
 msg.style.color="lime";
 
-}else{
-msg.innerText="❌ Invalid PIN or Mobile";
-msg.style.color="red";
-}
-
-// 🔄 RESET FIELDS
+// reset fields
 pinInput.value="";
 mobileInput.value="";
-
 };
+
 </script>
 
 </body>
