@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Win Your Reward</title>
+<title>Spin & Win</title>
 
 <style>
 body{
@@ -16,87 +16,87 @@ margin:0;
 text-align:center;
 }
 
-.box{
+.card{
 background:#fff;
 padding:25px;
-width:350px;
+width:360px;
 border-radius:16px;
 box-shadow:0 10px 30px rgba(0,0,0,.3);
 }
 
 .hidden{display:none;}
 
-button{
+input,button{
 width:100%;
 padding:12px;
 margin-top:10px;
-background:#ff7a18;
-border:none;
-color:white;
 border-radius:8px;
+border:none;
 font-size:16px;
-cursor:pointer;
 }
 
+input{text-align:center;border:1px solid #ccc;}
+
+button{background:#ff7a18;color:#fff;cursor:pointer;}
 button:disabled{background:#ccc;}
 
-input{
-width:100%;
-padding:10px;
-margin-top:10px;
-border-radius:6px;
-border:1px solid #ccc;
-text-align:center;
-}
-
 #slot{font-size:32px;margin:20px 0;}
-#result{font-size:20px;color:green;font-weight:bold;white-space:pre-line;}
-
-.pinBox{
-background:#000;
-color:#fff;
-padding:10px;
-border-radius:8px;
-letter-spacing:3px;
-margin-top:10px;
-}
-
+.pin{background:#000;color:#fff;padding:10px;border-radius:8px;}
 .whatsapp{background:#25D366;}
 </style>
 </head>
 
 <body>
 
-<div class="box">
+<div class="card">
 
 <!-- STEP 1 -->
-<div id="stepMobile">
-<h2>Enter Your Mobile Number</h2>
-<input id="mobileInput" placeholder="e.g. 0501234567">
+<div id="step1">
+<h2>Enter Mobile Number</h2>
+<input id="mobileInput" placeholder="0501234567">
 <button id="continueBtn">Continue</button>
 </div>
 
 <!-- STEP 2 -->
-<div id="stepSpin" class="hidden">
-
+<div id="step2" class="hidden">
 <h2>🎰 Spin & Win</h2>
-
 <button id="spinBtn">Spin</button>
 
 <div id="slot">🎰</div>
 <div id="result"></div>
 
-<div id="pinBox" class="pinBox hidden"></div>
+<div id="pinBox" class="pin hidden"></div>
 
 <button id="waBtn" class="whatsapp hidden">
 Order via WhatsApp
 </button>
-
 </div>
 
 </div>
 
-<script>
+<!-- FIREBASE + APP -->
+<script type="module">
+
+// ===== FIREBASE IMPORTS =====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// ===== FIREBASE CONFIG =====
+const firebaseConfig = {
+  apiKey: "AIzaSyBHlfarr3B28oS-DUW9rxSqSKN3vQJ1Lts",
+  authDomain: "discount-1b512.firebaseapp.com",
+  projectId: "discount-1b512",
+  storageBucket: "discount-1b512.firebasestorage.app",
+  messagingSenderId: "697234366614",
+  appId: "1:697234366614:web:359ac579df5478dfc8a2b7",
+  measurementId: "G-LTVZTLXKTG"
+};
+
+const app = initializeApp(firebaseConfig);
+getAnalytics(app);
+const db = getFirestore(app);
+
 // ===== COUPONS =====
 const COMMON=[
 {text:"10% OFF",code:"UA-7B3M9Q"},
@@ -125,11 +125,10 @@ const ULTRA=[
 const WHATSAPP_LINK="https://wa.me/c/918130173042";
 
 // ===== ELEMENTS =====
-const stepMobile=document.getElementById("stepMobile");
-const stepSpin=document.getElementById("stepSpin");
-const continueBtn=document.getElementById("continueBtn");
+const step1=document.getElementById("step1");
+const step2=document.getElementById("step2");
 const mobileInput=document.getElementById("mobileInput");
-
+const continueBtn=document.getElementById("continueBtn");
 const spinBtn=document.getElementById("spinBtn");
 const slot=document.getElementById("slot");
 const result=document.getElementById("result");
@@ -138,7 +137,7 @@ const waBtn=document.getElementById("waBtn");
 
 let customerMobile="";
 let currentPIN="";
-let currentReward=null;
+let reward=null;
 
 // ===== STEP 1 =====
 continueBtn.onclick=()=>{
@@ -147,8 +146,8 @@ alert("Enter valid mobile number");
 return;
 }
 customerMobile=mobileInput.value;
-stepMobile.classList.add("hidden");
-stepSpin.classList.remove("hidden");
+step1.classList.add("hidden");
+step2.classList.remove("hidden");
 };
 
 // ===== SPIN =====
@@ -156,11 +155,11 @@ spinBtn.onclick=()=>{
 spinBtn.disabled=true;
 
 let spins=15;
-let interval=setInterval(()=>{
+let timer=setInterval(()=>{
 slot.innerText=COMMON[Math.floor(Math.random()*COMMON.length)].text;
 spins--;
 if(spins===0){
-clearInterval(interval);
+clearInterval(timer);
 showWin();
 }
 },100);
@@ -168,36 +167,46 @@ showWin();
 
 function pickReward(){
 let r=Math.random();
-if(r<0.70) return COMMON[Math.floor(Math.random()*COMMON.length)];
+if(r<0.7) return COMMON[Math.floor(Math.random()*COMMON.length)];
 if(r<0.95) return RARE[Math.floor(Math.random()*RARE.length)];
 return ULTRA[Math.floor(Math.random()*ULTRA.length)];
 }
 
-function showWin(){
-currentReward=pickReward();
-result.innerText="YOU WON:\n"+currentReward.text+"\nCODE: "+currentReward.code;
+// ===== SHOW WIN =====
+async function showWin(){
+reward=pickReward();
+result.innerText=`YOU WON: ${reward.text}\nCODE: ${reward.code}`;
 
 currentPIN=Math.floor(100000+Math.random()*900000).toString();
+
 pinBox.innerText="ORDER PIN: "+currentPIN;
 pinBox.classList.remove("hidden");
 
 waBtn.classList.remove("hidden");
 
-waBtn.onclick=()=>{
-localStorage.setItem("orderPIN",currentPIN);
-localStorage.setItem("orderMobile",customerMobile);
+// Save order to Firestore
+await setDoc(doc(db,"orders",currentPIN),{
+pin:currentPIN,
+mobile:customerMobile,
+reward:reward.text,
+code:reward.code,
+used:false,
+created:Date.now()
+});
 
+waBtn.onclick=()=>{
 window.open(
 WHATSAPP_LINK+
 "?text="+encodeURIComponent(
-"Order Request\nReward: "+currentReward.text+
-"\nCoupon Code: "+currentReward.code+
+"Order Request\nReward: "+reward.text+
+"\nCode: "+reward.code+
 "\nPIN: "+currentPIN+
 "\nMobile: "+customerMobile
 )
 );
 };
 }
+
 </script>
 
 </body>
