@@ -1,132 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Restaurant Confirmation</title>
+<title>Staff Coupon Redeem</title>
 
 <style>
 body{
-margin:0;
-font-family:Arial;
-background:#ffffff;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+  font-family: Arial, sans-serif;
+  background:#f2f2f2;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
 
-.panel{
-width:320px;
-padding:25px;
-border-radius:12px;
-box-shadow:0 0 20px rgba(0,0,0,.15);
-text-align:center;
+.card{
+  background:#ffffff;
+  padding:30px;
+  border-radius:12px;
+  width:340px;
+  text-align:center;
+  box-shadow:0 6px 25px rgba(0,0,0,.15);
 }
 
-input,button{
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:8px;
-border:1px solid #ccc;
-text-align:center;
-font-size:16px;
+h2{
+  margin-top:0;
+  color:#222;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  font-size:18px;
+  margin-top:12px;
+  border-radius:6px;
+  border:1px solid #ccc;
 }
 
 button{
-background:#28a745;
-color:white;
-border:none;
-cursor:pointer;
+  width:100%;
+  padding:14px;
+  font-size:18px;
+  margin-top:18px;
+  background:#d4af37;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button:disabled{
+  background:#999;
+}
+
+#msg{
+  margin-top:15px;
+  font-size:16px;
+  color:#333;
 }
 </style>
 </head>
 
 <body>
 
-<div class="panel">
+<div class="card">
 
-<h3>Confirm Order</h3>
+<h2>STAFF REDEEM PANEL</h2>
 
-<input id="pinInput" placeholder="Enter PIN">
-<input id="mobileInput" placeholder="Enter Mobile Number">
+<div id="today"></div>
 
-<button id="confirmBtn">Confirm</button>
+<input id="phone" placeholder="Customer Mobile Number">
+<input id="code" placeholder="Coupon Code">
+
+<button id="btn" onclick="redeem()">REDEEM</button>
 
 <div id="msg"></div>
 
 </div>
 
-<script type="module">
+<script>
 
-// ===== FIREBASE IMPORTS =====
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
 
-// ===== FIREBASE CONFIG =====
-const firebaseConfig = {
-apiKey: "AIzaSyBHlfarr3B28oS-DUW9rxSqSKN3vQJ1Lts",
-authDomain: "discount-1b512.firebaseapp.com",
-projectId: "discount-1b512",
-storageBucket: "discount-1b512.firebasestorage.app",
-messagingSenderId: "697234366614",
-appId: "1:697234366614:web:359ac579df5478dfc8a2b7"
-};
+document.getElementById("today").innerText =
+"Date: " + new Date().toLocaleDateString();
 
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
+function redeem(){
 
-// ===== ELEMENTS =====
-const pinInput=document.getElementById("pinInput");
-const mobileInput=document.getElementById("mobileInput");
-const msg=document.getElementById("msg");
-const confirmBtn=document.getElementById("confirmBtn");
+ const phone=document.getElementById("phone").value.trim();
+ const code=document.getElementById("code").value.trim();
+ const btn=document.getElementById("btn");
+ const msg=document.getElementById("msg");
 
-// ===== CONFIRM =====
-confirmBtn.onclick=async ()=>{
+ if(phone=="" || code==""){
+   alert("Enter phone and coupon code");
+   return;
+ }
 
-let pin=pinInput.value.trim();
-let mobile=mobileInput.value.trim();
+ btn.disabled=true;
+ msg.innerText="Processing...";
 
-if(pin.length!==6 || mobile.length<8){
-msg.innerText="❌ Invalid format";
-msg.style.color="red";
-return;
+ fetch(SCRIPT_URL,{
+   method:"POST",
+   body:new URLSearchParams({
+     action:"redeem",
+     phone:phone,
+     code:code
+   })
+ })
+ .then(r=>r.text())
+ .then(res=>{
+
+   if(res==="REDEEMED"){
+     msg.style.color="green";
+     msg.innerText="Redeemed Successfully ✔";
+   }
+   else if(res==="USED"){
+     msg.style.color="orange";
+     msg.innerText="Coupon Already Used Today";
+   }
+   else{
+     msg.style.color="red";
+     msg.innerText="Invalid Coupon";
+   }
+
+   btn.disabled=false;
+ })
+ .catch(()=>{
+   msg.style.color="red";
+   msg.innerText="Network Error";
+   btn.disabled=false;
+ });
+
 }
-
-const ref=doc(db,"orders",pin);
-const snap=await getDoc(ref);
-
-if(!snap.exists()){
-msg.innerText="❌ PIN not found";
-msg.style.color="red";
-return;
-}
-
-const data=snap.data();
-
-if(data.mobile!==mobile){
-msg.innerText="❌ Mobile does not match PIN";
-msg.style.color="red";
-return;
-}
-
-if(data.used){
-msg.innerText="❌ PIN already used";
-msg.style.color="red";
-return;
-}
-
-// Mark PIN as used
-await updateDoc(ref,{used:true});
-
-msg.innerText="✅ Order Confirmed";
-msg.style.color="green";
-
-// reset fields
-pinInput.value="";
-mobileInput.value="";
-};
 
 </script>
 
