@@ -6,37 +6,37 @@
 
 <style>
 body{
+margin:0;
 font-family:Arial;
-background:#111;
-color:#fff;
+background:#ffffff;
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
-margin:0;
-text-align:center;
 }
 
 .panel{
-background:#222;
-padding:30px;
-width:330px;
+width:320px;
+padding:25px;
 border-radius:12px;
+box-shadow:0 0 20px rgba(0,0,0,.15);
+text-align:center;
 }
 
 input,button{
 width:100%;
 padding:12px;
 margin-top:10px;
-border-radius:6px;
-border:none;
-font-size:16px;
+border-radius:8px;
+border:1px solid #ccc;
 text-align:center;
+font-size:16px;
 }
 
 button{
 background:#28a745;
 color:white;
+border:none;
 cursor:pointer;
 }
 </style>
@@ -46,12 +46,12 @@ cursor:pointer;
 
 <div class="panel">
 
-<h2>Confirm Order</h2>
+<h3>Confirm Order</h3>
 
 <input id="pinInput" placeholder="Enter PIN">
-<input id="mobileInput" placeholder="Enter Mobile">
+<input id="mobileInput" placeholder="Enter Mobile Number">
 
-<button id="confirmBtn">Confirm Order</button>
+<button id="confirmBtn">Confirm</button>
 
 <div id="msg"></div>
 
@@ -65,17 +65,16 @@ import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/fi
 
 // ===== FIREBASE CONFIG =====
 const firebaseConfig = {
-  apiKey: "AIzaSyBHlfarr3B28oS-DUW9rxSqSKN3vQJ1Lts",
-  authDomain: "discount-1b512.firebaseapp.com",
-  projectId: "discount-1b512",
-  storageBucket: "discount-1b512.firebasestorage.app",
-  messagingSenderId: "697234366614",
-  appId: "1:697234366614:web:359ac579df5478dfc8a2b7",
-  measurementId: "G-LTVZTLXKTG"
+apiKey: "AIzaSyBHlfarr3B28oS-DUW9rxSqSKN3vQJ1Lts",
+authDomain: "discount-1b512.firebaseapp.com",
+projectId: "discount-1b512",
+storageBucket: "discount-1b512.firebasestorage.app",
+messagingSenderId: "697234366614",
+appId: "1:697234366614:web:359ac579df5478dfc8a2b7"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
 // ===== ELEMENTS =====
 const pinInput=document.getElementById("pinInput");
@@ -107,7 +106,7 @@ return;
 const data=snap.data();
 
 if(data.mobile!==mobile){
-msg.innerText="❌ Mobile does not match";
+msg.innerText="❌ Mobile does not match PIN";
 msg.style.color="red";
 return;
 }
@@ -121,14 +120,8 @@ return;
 // Mark PIN as used
 await updateDoc(ref,{used:true});
 
-// Add loyalty stamp (local device)
-let stamps=parseInt(localStorage.getItem("stamps")||"0");
-stamps++;
-if(stamps>10)stamps=10;
-localStorage.setItem("stamps",stamps);
-
-msg.innerText="✅ Order Confirmed & Stamp Added";
-msg.style.color="lime";
+msg.innerText="✅ Order Confirmed";
+msg.style.color="green";
 
 // reset fields
 pinInput.value="";
