@@ -1,104 +1,129 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Spin & Win</title>
 
 <style>
 body{
-margin:0;
-font-family:Arial;
-background:#ffffff;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+ margin:0;
+ min-height:100vh;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ background:linear-gradient(135deg,#ffecd2,#fcb69f);
+ font-family:Arial;
+ overflow:hidden;
 }
 
-.card{
-width:360px;
-padding:25px;
-border-radius:14px;
-box-shadow:0 0 25px rgba(0,0,0,.15);
-text-align:center;
+.overlay{
+ background:#fff;
+ padding:40px;
+ border-radius:20px;
+ text-align:center;
+ width:90%;
+ max-width:450px;
+ transform:scale(1.3);
+ box-shadow:0 8px 30px rgba(0,0,0,.25);
 }
 
-.hidden{display:none;}
-
-input,button{
-width:100%;
-padding:12px;
-margin-top:10px;
-font-size:16px;
-border-radius:8px;
-border:1px solid #ccc;
-text-align:center;
+input{
+ padding:14px;
+ width:90%;
+ font-size:18px;
+ margin-bottom:15px;
 }
 
 button{
-background:#ff7a18;
-color:white;
-border:none;
-cursor:pointer;
+ padding:14px 30px;
+ font-size:18px;
+ border:none;
+ border-radius:8px;
+ background:#27ae60;
+ color:white;
+ cursor:pointer;
 }
 
-button:disabled{background:#ccc;}
+button:disabled{background:#999;}
 
-#slot{font-size:40px;margin:20px 0;}
-.pinBox{background:black;color:white;padding:10px;border-radius:8px;}
-.whatsapp{background:#25D366;}
+#slot{
+ font-size:60px;
+ margin:20px 0;
+}
+
+#result,#code,#note{
+ font-size:22px;
+ font-weight:bold;
+ opacity:0;
+ margin-top:10px;
+}
+
+#note{
+ font-size:16px;
+ color:#b00000;
+}
+
+.win{
+ animation:pop .8s ease forwards,glow 1.5s infinite;
+}
+
+@keyframes pop{
+ 0%{transform:scale(.5);opacity:0}
+ 60%{transform:scale(1.3);opacity:1}
+ 100%{transform:scale(1);opacity:1}
+}
+@keyframes glow{
+ 0%{text-shadow:0 0 5px gold}
+ 50%{text-shadow:0 0 20px gold}
+ 100%{text-shadow:0 0 5px gold}
+}
+
+/* confetti */
+.confetti{
+ position:fixed;
+ width:10px;
+ height:10px;
+ top:-10px;
+ animation:fall linear forwards;
+}
+@keyframes fall{
+ to{transform:translateY(110vh) rotate(360deg);opacity:0}
+}
 </style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="overlay">
 
-<!-- STEP 1 -->
-<div id="step1">
-<h3>Enter Mobile Number</h3>
-<input id="mobileInput" placeholder="0501234567">
-<button id="continueBtn">Continue</button>
-</div>
+<h2 id="phoneTitle">Enter Mobile Number</h2>
+<input id="phone" placeholder="10-digit mobile number" maxlength="10">
+<button id="verifyBtn" onclick="verifyPhone()">Continue</button>
 
-<!-- STEP 2 -->
-<div id="step2" class="hidden">
-<h3>Spin & Win</h3>
-<button id="spinBtn">Spin</button>
+<div id="game" style="display:none">
+
+<h2>🎉 Spin & Win 🎉</h2>
+<button id="playBtn" onclick="play()">Get Discount</button>
 
 <div id="slot">🎰</div>
 <div id="result"></div>
+<div id="code"></div>
+<div id="note"></div>
 
-<div id="pinBox" class="pinBox hidden"></div>
-
-<button id="waBtn" class="whatsapp hidden">
-Order via WhatsApp
-</button>
 </div>
 
 </div>
 
-<!-- FIREBASE + APP -->
-<script type="module">
+<audio id="winSound" preload="auto">
+<source src="win-sound.mp3" type="audio/mpeg">
+</audio>
 
-// ===== FIREBASE IMPORTS =====
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<script>
 
-// ===== FIREBASE CONFIG =====
-const firebaseConfig = {
-apiKey: "AIzaSyBHlfarr3B28oS-DUW9rxSqSKN3vQJ1Lts",
-authDomain: "discount-1b512.firebaseapp.com",
-projectId: "discount-1b512",
-storageBucket: "discount-1b512.firebasestorage.app",
-messagingSenderId: "697234366614",
-appId: "1:697234366614:web:359ac579df5478dfc8a2b7"
-};
+const API_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
 
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
+/* ====== REWARDS ====== */
 
-// ===== COUPONS =====
 const COMMON=[
 {text:"10% OFF",code:"UA-7B3M9Q"},
 {text:"11% OFF",code:"UA-K8F2A6"},
@@ -114,103 +139,131 @@ const COMMON=[
 ];
 
 const RARE=[
-{text:"16% OFF",code:"UA-F4Q7A9"},
-{text:"17% OFF",code:"UA-6C2X8L"},
-{text:"18% OFF",code:"UA-Q9M5F2"}
+ {text:"16% OFF",code:"UA-F4Q7A9"},
+ {text:"17% OFF",code:"UA-6C2X8L"},
+ {text:"18% OFF",code:"UA-Q9M5F2"},
+ {text:"19% OFF",code:"UA-A7L4K6"},
+ {text:"20% OFF",code:"UA-3F8Q9X"},
 ];
 
-const ULTRA=[
-{text:"🍝 Buy 1 Get 1 Pasta",code:"UA-PB7X2L"}
+const ULTRA_RARE=[
+{text:"🍝 Buy 1 Get 1 Free Pasta",code:"UA-PB7X2L"}
 {text:"🥤 Get 500ml Free Main", code:"UA-5KQ9Z2"}
 ];
 
-const WHATSAPP_LINK="https://wa.me/c/918130173042";
+/* ====== PHONE VERIFY ====== */
 
-// ===== ELEMENTS =====
-const step1=document.getElementById("step1");
-const step2=document.getElementById("step2");
-const mobileInput=document.getElementById("mobileInput");
-const continueBtn=document.getElementById("continueBtn");
-const spinBtn=document.getElementById("spinBtn");
-const slot=document.getElementById("slot");
-const result=document.getElementById("result");
-const pinBox=document.getElementById("pinBox");
-const waBtn=document.getElementById("waBtn");
+let phone="";
 
-let customerMobile="";
-let currentPIN="";
-let reward=null;
+function verifyPhone(){
 
-// ===== STEP 1 =====
-continueBtn.onclick=()=>{
-if(mobileInput.value.length<8){
-alert("Enter valid mobile number");
-return;
-}
-customerMobile=mobileInput.value;
-step1.classList.add("hidden");
-step2.classList.remove("hidden");
-};
+ phone=document.getElementById("phone").value.trim();
 
-// ===== SPIN =====
-spinBtn.onclick=()=>{
-spinBtn.disabled=true;
+ if(!/^[0-9]{10}$/.test(phone)){
+   alert("Enter valid 10-digit number");
+   return;
+ }
 
-let spins=15;
-let timer=setInterval(()=>{
-slot.innerText=COMMON[Math.floor(Math.random()*COMMON.length)].text;
-spins--;
-if(spins===0){
-clearInterval(timer);
-showWin();
-}
-},100);
-};
-
-function pickReward(){
-let r=Math.random();
-if(r<0.7) return COMMON[Math.floor(Math.random()*COMMON.length)];
-if(r<0.95) return RARE[Math.floor(Math.random()*RARE.length)];
-return ULTRA[Math.floor(Math.random()*ULTRA.length)];
+ fetch(API_URL+"?phone="+phone)
+ .then(r=>r.text())
+ .then(res=>{
+   if(res==="ALREADY_USED"){
+     alert("Already played today");
+   }else{
+     document.getElementById("phone").style.display="none";
+     document.getElementById("verifyBtn").style.display="none";
+     document.getElementById("phoneTitle").style.display="none";
+     document.getElementById("game").style.display="block";
+   }
+ });
 }
 
-// ===== SHOW WIN =====
-async function showWin(){
-reward=pickReward();
-result.innerText=`YOU WON: ${reward.text}\nCODE: ${reward.code}`;
+/* ====== GAME ====== */
 
-currentPIN=Math.floor(100000+Math.random()*900000).toString();
+function play(){
+ document.getElementById("playBtn").disabled=true;
+ spin();
+}
 
-pinBox.innerText="ORDER PIN: "+currentPIN;
-pinBox.classList.remove("hidden");
+function spin(){
 
-waBtn.classList.remove("hidden");
+ let spins=25;
 
-// Save order to Firestore
-await setDoc(doc(db,"orders",currentPIN),{
-pin:currentPIN,
-mobile:customerMobile,
-reward:reward.text,
-code:reward.code,
-used:false,
-created:Date.now()
-});
+ const interval=setInterval(()=>{
+   document.getElementById("slot").innerText=
+   Math.floor(Math.random()*50)+1;
+   spins--;
 
-waBtn.onclick=()=>{
-window.location.href=
-WHATSAPP_LINK+
-"?text="+encodeURIComponent(
-"Order Request\nReward: "+reward.text+
-"\nCode: "+reward.code+
-"\nPIN: "+currentPIN+
-"\nMobile: "+customerMobile
-)
-);
-};
+   if(spins===0){
+     clearInterval(interval);
+     showWin();
+   }
+ },100);
+}
+
+/* ====== PROBABILITY ====== */
+
+function getReward(){
+
+ const chance=Math.random()*100;
+
+ if(chance<70){
+   return COMMON[Math.floor(Math.random()*COMMON.length)];
+ }
+ else if(chance<95){
+   return RARE[Math.floor(Math.random()*RARE.length)];
+ }
+ else{
+   return ULTRA_RARE[0];
+ }
+}
+
+/* ====== WIN ====== */
+
+function showWin(){
+
+ const reward=getReward();
+
+ document.getElementById("slot").innerText=reward.text;
+ document.getElementById("result").innerText="🎉 YOU WON "+reward.text;
+ document.getElementById("code").innerText="CODE: "+reward.code;
+
+ document.getElementById("note").innerText=
+ "Do not refresh or leave the screen. Take a screenshot and share it while placing the order.";
+
+ document.getElementById("result").classList.add("win");
+ document.getElementById("result").style.opacity=1;
+ document.getElementById("code").style.opacity=1;
+ document.getElementById("note").style.opacity=1;
+
+ document.getElementById("winSound").currentTime=0;
+ document.getElementById("winSound").play();
+
+ startConfetti();
+}
+
+/* ====== CONFETTI LOOP ====== */
+
+let confettiLoop=null;
+
+function startConfetti(){
+
+ if(confettiLoop) return;
+
+ confettiLoop=setInterval(()=>{
+   for(let i=0;i<8;i++){
+     const c=document.createElement("div");
+     c.className="confetti";
+     c.style.left=Math.random()*100+"vw";
+     c.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
+     c.style.animationDuration=(Math.random()*2+2)+"s";
+     document.body.appendChild(c);
+     setTimeout(()=>c.remove(),4000);
+   }
+ },700);
 }
 
 </script>
 
 </body>
 </html>
-
