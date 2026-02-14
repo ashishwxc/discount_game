@@ -1,139 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Staff Coupon Redeem</title>
-
+<title>Staff Redeem</title>
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f2f2f2;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-}
-
-.card{
-  background:#ffffff;
-  padding:30px;
-  border-radius:12px;
-  width:340px;
-  text-align:center;
-  box-shadow:0 6px 25px rgba(0,0,0,.15);
-}
-
-h2{
-  margin-top:0;
-  color:#222;
-}
-
-input{
-  width:100%;
-  padding:14px;
-  font-size:18px;
-  margin-top:12px;
-  border-radius:6px;
-  border:1px solid #ccc;
-}
-
-button{
-  width:100%;
-  padding:14px;
-  font-size:18px;
-  margin-top:18px;
-  background:#d4af37;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-button:disabled{
-  background:#999;
-}
-
-#msg{
-  margin-top:15px;
-  font-size:16px;
-  color:#333;
-}
+body{text-align:center;font-family:Arial;background:#fff}
+input,button{padding:12px;font-size:18px;margin:8px}
+button{background:black;color:white;border:none;border-radius:8px}
 </style>
 </head>
 
 <body>
 
-<div class="card">
+<h2>Staff Coupon Redeem</h2>
 
-<h2>STAFF REDEEM PANEL</h2>
-
-<div id="today"></div>
-
-<input id="phone" placeholder="Customer Mobile Number">
+<input id="phone" placeholder="Customer Mobile">
+<br>
 <input id="code" placeholder="Coupon Code">
-
-<button id="btn" onclick="redeem()">REDEEM</button>
-
-<div id="msg"></div>
-
-</div>
+<br>
+<button onclick="redeem()">Confirm Redeem</button>
 
 <script>
-
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
 
-document.getElementById("today").innerText =
-"Date: " + new Date().toLocaleDateString();
-
 function redeem(){
+ let p=document.getElementById("phone").value;
+ let c=document.getElementById("code").value;
 
- const phone=document.getElementById("phone").value.trim();
- const code=document.getElementById("code").value.trim();
- const btn=document.getElementById("btn");
- const msg=document.getElementById("msg");
-
- if(phone=="" || code==""){
-   alert("Enter phone and coupon code");
-   return;
- }
-
- btn.disabled=true;
- msg.innerText="Processing...";
-
- fetch(SCRIPT_URL,{
-   method:"POST",
-   body:new URLSearchParams({
-     action:"redeem",
-     phone:phone,
-     code:code
-   })
- })
- .then(r=>r.text())
- .then(res=>{
-
-   if(res==="REDEEMED"){
-     msg.style.color="green";
-     msg.innerText="Redeemed Successfully ✔";
-   }
-   else if(res==="USED"){
-     msg.style.color="orange";
-     msg.innerText="Coupon Already Used Today";
-   }
-   else{
-     msg.style.color="red";
-     msg.innerText="Invalid Coupon";
-   }
-
-   btn.disabled=false;
- })
- .catch(()=>{
-   msg.style.color="red";
-   msg.innerText="Network Error";
-   btn.disabled=false;
+ fetch(SCRIPT_URL+"?action=redeem&phone="+p+"&code="+c)
+ .then(r=>r.json())
+ .then(d=>{
+  alert("Redeemed & Loyalty Updated");
  });
-
 }
-
 </script>
 
 </body>
