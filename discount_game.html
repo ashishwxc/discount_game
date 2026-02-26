@@ -1,226 +1,129 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body{
-  margin:0;
-  background:#0f0f0f;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  font-family:sans-serif;
-  color:white;
-}
-.container{
-  text-align:center;
-  width:95%;
-  max-width:400px;
-}
-input{
-  padding:12px;
-  width:100%;
-  border-radius:8px;
-  border:none;
-  text-align:center;
-  font-size:16px;
-}
-button{
-  padding:14px 25px;
-  border:none;
-  border-radius:8px;
-  background:gold;
-  font-weight:bold;
-  cursor:pointer;
-}
-button:disabled{
-  opacity:0.5;
-}
-#spinnerBox{
-  margin-top:20px;
-  font-size:60px;
-  font-weight:bold;
-  height:80px;
-  display:none;
-}
-.result{
-  margin-top:15px;
-  font-size:18px;
-  font-weight:bold;
-}
-.stamps{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:8px;
-  margin-top:20px;
-}
-.stamp{
-  width:45px;
-  height:45px;
-  border-radius:50%;
-  background:#333;
-}
-.earned{
-  background:linear-gradient(45deg,#FFD700,#FFA500);
-  box-shadow:0 0 12px gold;
-}
-canvas{
-  position:fixed;
-  top:0;
-  left:0;
-  pointer-events:none;
-}
-</style>
+  <title>Win Your Discount</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    button {
+      padding: 15px 25px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    #timer {
+      font-size: 20px;
+      margin-top: 15px;
+      color: red;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 30px;
+      font-weight: bold;
+      color: green;
+      opacity: 0;
+    }
+
+    .win {
+      animation: pop 1s ease forwards, glow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      60% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes glow {
+      0% { text-shadow: 0 0 5px gold; }
+      50% { text-shadow: 0 0 20px gold; }
+      100% { text-shadow: 0 0 5px gold; }
+    }
+  </style>
 </head>
 <body>
 
-<canvas id="confetti"></canvas>
+  <h1>🎉 Click & Win a Discount 🎉</h1>
+  <button id="discountBtn" onclick="startGame()">Get Your Discount</button>
 
-<div class="container">
+  <div id="timer"></div>
+  <div id="result"></div>
 
-<h2>Spin & Win</h2>
+  <audio id="winSound" preload="auto">
+    <source src="https://www.soundjay.com/buttons/sounds/button-4.mp3" type="audio/mpeg">
+  </audio>
 
-<input id="mobile" placeholder="Enter Mobile Number">
+  <script>
+    const STORAGE_KEY = "discountPlayedDate";
+    const today = new Date().toISOString().split("T")[0];
+    const winSound = document.getElementById("winSound");
+    const button = document.getElementById("discountBtn");
 
-<br><br>
-
-<button id="spinBtn" onclick="spin()">SPIN</button>
-
-<div id="spinnerBox">0</div>
-
-<div class="result" id="result"></div>
-
-<button id="waBtn" style="display:none;"
-onclick="window.location.href='https://wa.me/c/918130173042'">
-Order on WhatsApp
-</button>
-
-<div class="stamps" id="stamps"></div>
-<p id="loyaltyText"></p>
-
-</div>
-
-<script>
-const WEBAPP="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
-
-// 🎯 Probability Logic
-function getPrize(){
-  let rand=Math.random()*100;
-
-  if(rand<5){
-    return {type:"ULTRA", value:"Buy 1 Get 1 Pasta"};
-  }
-  else if(rand<20){
-    let rare=Math.floor(Math.random()*6)+15;
-    return {type:"RARE", value:rare+"% OFF"};
-  }
-  else{
-    let common=Math.floor(Math.random()*5)+10;
-    return {type:"COMMON", value:common+"% OFF"};
-  }
-}
-
-function spin(){
-  const mobile=document.getElementById("mobile").value;
-  if(!mobile) return alert("Enter mobile number");
-
-  const btn=document.getElementById("spinBtn");
-  const spinner=document.getElementById("spinnerBox");
-  btn.disabled=true;
-  spinner.style.display="block";
-
-  let count=0;
-  let interval=setInterval(()=>{
-    spinner.innerText=Math.floor(Math.random()*50)+1;
-    count++;
-    if(count>25){
-      clearInterval(interval);
-      finishSpin(mobile);
+    // 🚫 Check if already played today
+    if (localStorage.getItem(STORAGE_KEY) === today) {
+      button.disabled = true;
+      document.getElementById("result").style.opacity = 1;
+      document.getElementById("result").innerText =
+        "❌ You already played today. Come back tomorrow!";
     }
-  },100);
-}
 
-function finishSpin(mobile){
+    let clicked = false;
 
-  const prize=getPrize();
+    function startGame() {
+      if (clicked) return;
+      clicked = true;
 
-  fetch(WEBAPP,{
-    method:"POST",
-    body:new URLSearchParams({action:"generate",mobile})
-  })
-  .then(res=>res.json())
-  .then(data=>{
-    document.getElementById("result").innerText=
-      prize.value+"\nCode: "+data.code;
+      // 🔓 Unlock sound
+      winSound.play().then(() => {
+        winSound.pause();
+        winSound.currentTime = 0;
+      }).catch(() => {});
 
-    playSound();
-    startConfetti();
-    document.getElementById("waBtn").style.display="block";
-    loadLoyalty(mobile);
-  });
-}
+      button.disabled = true;
 
-// 🎉 Confetti Animation
-const canvas=document.getElementById("confetti");
-const ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
-let pieces=[];
+      let timeLeft = 10;
+      document.getElementById("timer").innerText =
+        "Please wait... " + timeLeft + " seconds";
 
-function startConfetti(){
-  pieces=[];
-  for(let i=0;i<120;i++){
-    pieces.push({
-      x:Math.random()*canvas.width,
-      y:Math.random()*canvas.height,
-      r:Math.random()*6+2,
-      d:Math.random()*canvas.height
-    });
-  }
-  animate();
-}
+      const countdown = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerText =
+          "Please wait... " + timeLeft + " seconds";
 
-function animate(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  pieces.forEach(p=>{
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fillStyle="gold";
-    ctx.fill();
-    p.y+=3;
-    if(p.y>canvas.height) p.y=0;
-  });
-  requestAnimationFrame(animate);
-}
+        if (timeLeft === 0) {
+          clearInterval(countdown);
+          showDiscount();
+        }
+      }, 1000);
+    }
 
-// 🔊 Winning Sound
-function playSound(){
-  let audio=new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-  audio.play();
-}
+    function showDiscount() {
+      const discount = Math.floor(Math.random() * 11) + 10;
 
-// ⭐ Loyalty Loader
-function loadLoyalty(mobile){
- fetch(WEBAPP,{
-   method:"POST",
-   body:new URLSearchParams({action:"loyalty",mobile})
- })
- .then(res=>res.text())
- .then(count=>{
-   const stamps=document.getElementById("stamps");
-   stamps.innerHTML="";
-   for(let i=0;i<10;i++){
-     let div=document.createElement("div");
-     div.className="stamp";
-     if(i<count%10) div.classList.add("earned");
-     stamps.appendChild(div);
-   }
-   document.getElementById("loyaltyText").innerText=
-     count%10+"/10 collected - "+(10-count%10)+" more to go";
- });
-}
-</script>
+      // ✅ Save today's date (LOCKS GAME)
+      localStorage.setItem(STORAGE_KEY, today);
+
+      document.getElementById("timer").innerText = "";
+
+      const result = document.getElementById("result");
+      result.innerText = "🎊 YOU WON " + discount + "% OFF!";
+      result.classList.add("win");
+      result.style.opacity = 1;
+
+      winSound.currentTime = 0;
+      winSound.play();
+    }
+  </script>
 
 </body>
 </html>
