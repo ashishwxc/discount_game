@@ -1,35 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Staff Redeem</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{text-align:center;font-family:Arial;background:#fff}
-input,button{padding:12px;font-size:18px;margin:8px}
-button{background:black;color:white;border:none;border-radius:8px}
+body{
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ height:100vh;
+ font-family:sans-serif;
+}
+.box{
+ text-align:center;
+}
+button{
+ padding:10px 20px;
+}
 </style>
 </head>
-
 <body>
 
-<h2>Staff Coupon Redeem</h2>
+<div class="box">
+<h3>Validate Coupon</h3>
 
-<input id="phone" placeholder="Customer Mobile">
-<br>
-<input id="code" placeholder="Coupon Code">
-<br>
-<button onclick="redeem()">Confirm Redeem</button>
+<input id="mobile" placeholder="Mobile Number"><br><br>
+<input id="code" placeholder="Coupon Code"><br><br>
+
+<button id="submit" onclick="validate()">Submit</button>
+
+<p id="msg"></p>
+</div>
 
 <script>
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
+const WEBAPP="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
 
-function redeem(){
- let p=document.getElementById("phone").value;
- let c=document.getElementById("code").value;
+function validate(){
+ const mobile=document.getElementById("mobile").value;
+ const code=document.getElementById("code").value;
+ const btn=document.getElementById("submit");
+ btn.disabled=true;
 
- fetch(SCRIPT_URL+"?action=redeem&phone="+p+"&code="+c)
- .then(r=>r.json())
- .then(d=>{
-  alert("Redeemed & Loyalty Updated");
+ fetch(WEBAPP,{
+   method:"POST",
+   body:new URLSearchParams({action:"validate",mobile,code})
+ })
+ .then(res=>res.text())
+ .then(data=>{
+   if(data=="VALID"){
+     msg.innerText="Coupon Accepted ✅";
+   }else if(data=="USED"){
+     msg.innerText="Already Used";
+   }else{
+     msg.innerText="Invalid Coupon";
+   }
+
+   document.getElementById("mobile").value="";
+   document.getElementById("code").value="";
+   btn.disabled=false;
  });
 }
 </script>
