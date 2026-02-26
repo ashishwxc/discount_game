@@ -1,126 +1,212 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Umami & Aroma Rewards</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{font-family:Arial;background:#fff;text-align:center}
-button{padding:14px 22px;font-size:18px;border-radius:10px;border:none;background:#000;color:#fff}
-#wheel{font-size:30px;margin:30px}
+body{
+ margin:0;
+ background:#0f0f0f;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ height:100vh;
+ font-family:sans-serif;
+ color:white;
+ overflow:hidden;
+}
+.container{
+ text-align:center;
+ width:95%;
+ max-width:420px;
+}
+#wheel{
+ width:300px;
+ height:300px;
+ border-radius:50%;
+ border:8px solid gold;
+ margin:auto;
+ position:relative;
+ transition:transform 5s cubic-bezier(.17,.67,.83,.67);
+}
+.slice{
+ position:absolute;
+ width:50%;
+ height:50%;
+ background:gold;
+ transform-origin:100% 100%;
+}
+button{
+ padding:15px 25px;
+ border:none;
+ border-radius:10px;
+ background:gold;
+ font-weight:bold;
+ cursor:pointer;
+}
+canvas{
+ position:fixed;
+ top:0;
+ left:0;
+ pointer-events:none;
+}
+.stamps{
+ display:grid;
+ grid-template-columns:repeat(5,1fr);
+ gap:8px;
+ margin-top:20px;
+}
 .stamp{
- width:55px;height:55px;border-radius:50%;
- border:2px dashed gold;margin:5px;
- display:inline-flex;align-items:center;justify-content:center;
+ width:45px;
+ height:45px;
+ border-radius:50%;
+ background:#333;
 }
-.filled{
- background:radial-gradient(circle,#ffd700,#b8860b);
- animation:pulse 1s infinite;
+.earned{
+ background:linear-gradient(45deg,#FFD700,#FFA500);
+ box-shadow:0 0 10px gold;
 }
-@keyframes pulse{0%{transform:scale(1)}50%{scale:1.1}100%{scale:1}}
 </style>
 </head>
-
 <body>
 
-<h2 style="font-size:20px">Umami & Aroma Rewards</h2>
+<canvas id="confetti"></canvas>
 
-<div id="step1">
-<input id="phone" placeholder="Enter Mobile Number">
-<br><br>
-<button onclick="start()">Continue</button>
-</div>
+<div class="container">
 
-<div id="step2" style="display:none">
-<div id="wheel">🎰</div>
+<h2>Spin & Win</h2>
+<input id="mobile" placeholder="Mobile Number"><br><br>
+
+<div id="wheel"></div><br>
+
 <button id="spinBtn" onclick="spin()">SPIN</button>
-<h2 id="result"></h2>
 
-<br>
-<a id="wa" target="_blank">
-<button>Order on WhatsApp</button>
-</a>
+<h3 id="result"></h3>
+<button id="waBtn" style="display:none;"
+onclick="window.location.href='https://wa.me/c/918130173042'">
+Order on WhatsApp
+</button>
 
-<h3>Loyalty Card</h3>
-<div id="card"></div>
+<div class="stamps" id="stamps"></div>
+<p id="loyaltyText"></p>
+
 </div>
 
 <script>
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
+const WEBAPP="https://script.google.com/macros/s/AKfycbwGs4aNFvnstAb2ZIv2x1wuJN-IFtLwmQ0lWUVmVSUtoGdsUMBgW973QC0UNAgQD_gV/exec";
+const wheel=document.getElementById("wheel");
+const slices=12;
+for(let i=0;i<slices;i++){
+ let div=document.createElement("div");
+ div.className="slice";
+ div.style.transform="rotate("+i*(360/slices)+"deg) skewY(-60deg)";
+ wheel.appendChild(div);
+}
 
-const COMMON=[
-{text:"10% OFF",code:"UA-7B3M9Q"},
-{text:"11% OFF",code:"UA-K8F2A6"},
-{text:"12% OFF",code:"UA-9Q4L2X"},
-{text:"13% OFF",code:"UA-M5A7C8"},
-{text:"14% OFF",code:"UA-2XQ9F4"},
-{text:"🍹 Free Iced Tea",code:"UA-T9F3KQ"},
-{text:"☕ Free Iced Americano",code:"UA-A7M2QX"}
-];
+// 🎯 Probability Engine
+function getPrize(){
+ let rand=Math.random()*100;
 
-const RARE=[
-{text:"16% OFF",code:"UA-F4Q7A9"},
-{text:"17% OFF",code:"UA-6C2X8L"},
-{text:"18% OFF",code:"UA-Q9M5F2"},
-{text:"Buy Burger + Fries",code:"UA-BG7K2"},
-{text:"Buy Sandwich + Drink",code:"UA-SD9M3"},
-{text:"Buy 2 Beverages Get 1",code:"UA-B21QX"},
-{text:"Get Free Fries",code:"UA-FR88Q"}
-];
-
-const ULTRA=[{text:"🍝 Buy 1 Get 1 Pasta",code:"UA-PB7X2L"}];
-
-let phone="";
-let spinning=false;
-
-function start(){
- phone=document.getElementById("phone").value;
- fetch(SCRIPT_URL+"?action=play&phone="+phone)
- .then(r=>r.json())
- .then(d=>{
-  if(d.status=="used"){alert("Already played today");return;}
-  document.getElementById("step1").style.display="none";
-  document.getElementById("step2").style.display="block";
-  loadCard();
- });
+ if(rand<5) return "ULTRA";
+ if(rand<20) return "RARE";
+ return "COMMON";
 }
 
 function spin(){
- if(spinning) return;
- spinning=true;
- document.getElementById("spinBtn").disabled=true;
+ const mobile=document.getElementById("mobile").value;
+ const btn=document.getElementById("spinBtn");
+ btn.disabled=true;
 
- let r=Math.random()*100;
- let prize;
- if(r<60) prize=COMMON[Math.floor(Math.random()*COMMON.length)];
- else if(r<90) prize=RARE[Math.floor(Math.random()*RARE.length)];
- else prize=ULTRA[0];
+ const prizeType=getPrize();
+ let discount;
 
- document.getElementById("result").innerHTML=
- prize.text+"<br>"+prize.code;
-
- if(navigator.vibrate) navigator.vibrate([200,100,200]);
-
- document.getElementById("wa").href=
- "https://wa.me/c/918130173042?text=My%20coupon%20code%20is%20"+prize.code;
-
- setInterval(checkStatus,4000);
-}
-
-function loadCard(){
- fetch(SCRIPT_URL+"?action=check&phone="+phone)
- .then(r=>r.json())
- .then(d=>drawCard(d.stamps));
-}
-
-function checkStatus(){ loadCard(); }
-
-function drawCard(n){
- let c="";
- for(let i=0;i<10;i++){
-  c+="<div class='stamp "+(i<n?"filled":"")+"'>⭐</div>";
+ if(prizeType=="ULTRA"){
+   discount="Buy 1 Get 1 Pasta";
  }
- document.getElementById("card").innerHTML=c;
+ else if(prizeType=="RARE"){
+   discount=Math.floor(Math.random()*6)+15+"% OFF";
+ }
+ else{
+   discount=Math.floor(Math.random()*5)+10+"% OFF";
+ }
+
+ const degree=3600+Math.floor(Math.random()*360);
+ wheel.style.transform="rotate("+degree+"deg)";
+
+ setTimeout(()=>{
+   fetch(WEBAPP,{
+     method:"POST",
+     body:new URLSearchParams({action:"generate",mobile})
+   })
+   .then(res=>res.json())
+   .then(data=>{
+     document.getElementById("result").innerText=
+       discount+"\nCode: "+data.code;
+
+     playSound();
+     startConfetti();
+     document.getElementById("waBtn").style.display="block";
+     loadLoyalty(mobile);
+   });
+ },5000);
+}
+
+// 🎉 Confetti
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+let pieces=[];
+
+function startConfetti(){
+ for(let i=0;i<150;i++){
+   pieces.push({
+     x:Math.random()*canvas.width,
+     y:Math.random()*canvas.height,
+     r:Math.random()*6+2,
+     d:Math.random()*150
+   });
+ }
+ animate();
+}
+
+function animate(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ pieces.forEach(p=>{
+   ctx.beginPath();
+   ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+   ctx.fillStyle="gold";
+   ctx.fill();
+   p.y+=2;
+   if(p.y>canvas.height) p.y=0;
+ });
+ requestAnimationFrame(animate);
+}
+
+// 🔊 Sound
+function playSound(){
+ let audio=new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+ audio.play();
+}
+
+// ⭐ Loyalty
+function loadLoyalty(mobile){
+ fetch(WEBAPP,{
+   method:"POST",
+   body:new URLSearchParams({action:"loyalty",mobile})
+ })
+ .then(res=>res.text())
+ .then(count=>{
+   const stamps=document.getElementById("stamps");
+   stamps.innerHTML="";
+   for(let i=0;i<10;i++){
+     let div=document.createElement("div");
+     div.className="stamp";
+     if(i<count%10) div.classList.add("earned");
+     stamps.appendChild(div);
+   }
+   document.getElementById("loyaltyText").innerText=
+     count%10+"/10 collected - "+(10-count%10)+" more to go";
+ });
 }
 </script>
 
