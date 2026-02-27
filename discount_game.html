@@ -23,7 +23,6 @@ body {
   border-radius: 14px;
   max-width: 90%;
   box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-  z-index: 2;
 }
 
 button {
@@ -99,7 +98,7 @@ button:disabled {
 
 <div class="overlay">
   <h2>🎉 Spin & Win Reward 🎉</h2>
-  <button id="discountBtn" onclick="startGame()">Spin Now</button>
+  <button id="discountBtn">Spin Now</button>
   <div id="timer"></div>
   <div id="slot">🎰</div>
   <div id="result"></div>
@@ -109,10 +108,6 @@ button:disabled {
   </p>
 </div>
 
-<audio id="winSound" preload="auto">
-  <source src="win-sound.mp3" type="audio/mpeg">
-</audio>
-
 <script>
 
 const STORAGE_KEY = "rewardPlayedDate";
@@ -120,20 +115,22 @@ const todayKey = new Date().toISOString().split("T")[0];
 
 const NORMAL = [
 {text:"10% OFF",code:"UA-7B3M9Q"},
-{text:"🍹 Free Iced Tea",code:"UA-T9F3KQ"},
-{text:"Buy 2 Beverages Get 1",code:"UA-B21QX"},
-{text:"Buy Burger + Fries Free",code:"UA-BG7K2"},
-{text:"Buy Sandwich + Drink Free",code:"UA-SD9M3"},
-{text:"Get Free Fries",code:"UA-FR88Q"}
-{text:"☕ Free Iced Americano",code:"UA-A7M2QX"}
-];
-
-const RARE = [
 {text:"11% OFF",code:"UA-K8F2A6"},
 {text:"12% OFF",code:"UA-9Q4L2X"},
 {text:"13% OFF",code:"UA-M5A7C8"},
 {text:"14% OFF",code:"UA-2XQ9F4"},
-{text:"15% OFF",code:"UA-F4Q7A9"}
+{text:"🍹 Free Iced Tea",code:"UA-T9F3KQ"},
+{text:"☕ Free Iced Americano",code:"UA-A7M2QX"}
+];
+
+const RARE = [
+{text:"16% OFF",code:"UA-F4Q7A9"},
+{text:"17% OFF",code:"UA-6C2X8L"},
+{text:"18% OFF",code:"UA-Q9M5F2"},
+{text:"Buy Burger + Fries Free",code:"UA-BG7K2"},
+{text:"Buy Sandwich + Drink Free",code:"UA-SD9M3"},
+{text:"Buy 2 Beverages Get 1",code:"UA-B21QX"},
+{text:"Get Free Fries",code:"UA-FR88Q"}
 ];
 
 const ULTRA = [
@@ -144,7 +141,6 @@ const btn = document.getElementById("discountBtn");
 const timer = document.getElementById("timer");
 const slot = document.getElementById("slot");
 const result = document.getElementById("result");
-const winSound = document.getElementById("winSound");
 
 let confettiInterval = null;
 
@@ -154,13 +150,10 @@ if(localStorage.getItem(STORAGE_KEY) === todayKey){
   result.innerText = "❌ Already played today.\nCome back tomorrow!";
 }
 
+btn.addEventListener("click", startGame);
+
 function startGame(){
   btn.disabled = true;
-
-  winSound.play().then(()=>{
-    winSound.pause();
-    winSound.currentTime = 0;
-  }).catch(()=>{});
 
   let timeLeft = 3;
   timer.innerText = "Spinning in " + timeLeft + "s";
@@ -172,7 +165,7 @@ function startGame(){
       timer.innerText = "Spinning in " + timeLeft + "s";
     } else {
       clearInterval(countdown);
-      timer.innerText = ""; // removes text
+      timer.innerText = "";
       spinSlot();
     }
 
@@ -207,7 +200,6 @@ function getReward(){
 
 function showWin(){
   const reward = getReward();
-
   localStorage.setItem(STORAGE_KEY, todayKey);
 
   slot.innerText = "🎉";
@@ -219,9 +211,6 @@ function showWin(){
 
   result.classList.add("win");
   result.style.opacity = 1;
-
-  winSound.currentTime = 0;
-  winSound.play();
 
   startConfetti();
 
