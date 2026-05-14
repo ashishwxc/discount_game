@@ -1,91 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Scratch & Win Reward</title>
 
 <style>
 
 /* RESET */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* BACKGROUND */
+
 html,
 body {
   width: 100%;
   min-height: 100%;
   overflow-x: hidden;
-  background: linear-gradient(135deg, #ffecd2, #fcb69f);
   font-family: Arial, sans-serif;
 }
 
 body {
   min-height: 100vh;
+
   display: flex;
   justify-content: center;
   align-items: center;
+
   padding: 20px;
+
+  background-image: url('https://github.com/ashishwxc/discount_game/blob/main/WhatsApp%20Image%202026-01-24%20at%2010.29.22%20PM.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
   position: relative;
 }
 
-/* Prevent any accidental text overflow */
-body::before,
-body::after {
+/* DARK OVERLAY FOR TRANSPARENCY */
+
+body::before {
   content: "";
-  display: none;
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0,0,0,0.35);
+
+  backdrop-filter: blur(2px);
+
+  z-index: 0;
 }
+
+/* MAIN CARD */
 
 .overlay {
   width: 100%;
   max-width: 560px;
-  background: rgba(255,255,255,0.96);
+
+  background: rgba(255,255,255,0.93);
+
   padding: 40px 30px;
-  border-radius: 20px;
+
+  border-radius: 24px;
+
   text-align: center;
-  box-shadow: 0 10px 35px rgba(0,0,0,0.18);
+
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+
   position: relative;
   z-index: 2;
 }
 
+/* DATE TIME */
+
 #datetime {
   font-size: 18px;
   margin-bottom: 28px;
-  color: #555;
+  color: #444;
   font-weight: bold;
   line-height: 1.5;
 }
 
+/* TITLE */
+
 h2 {
-  font-size: 28px;
-  margin-bottom: 28px;
-  color: #000;
+  font-size: 30px;
+  margin-bottom: 30px;
+  color: #111;
+  line-height: 1.3;
 }
+
+/* SCRATCH CARD */
 
 .scratch-container {
   position: relative;
+
   width: 320px;
   height: 180px;
+
   margin: 0 auto 30px;
-  border-radius: 16px;
+
+  border-radius: 18px;
+
   overflow: hidden;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
 }
+
+/* REWARD CARD */
 
 .reward-card {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #fff7cc, #ffe082);
+
+  background:
+    linear-gradient(135deg, #fff7cc, #ffe082);
+
   display: flex;
   flex-direction: column;
+
   justify-content: center;
   align-items: center;
-  padding: 20px;
-  color: #222;
+
   text-align: center;
+
+  padding: 20px;
+
+  color: #222;
 }
 
 .reward-card h3 {
@@ -100,20 +149,29 @@ h2 {
   font-weight: bold;
 }
 
+/* SCRATCH LAYER */
+
 canvas {
   position: absolute;
   top: 0;
   left: 0;
+
   width: 100%;
   height: 100%;
+
   cursor: pointer;
 }
 
+/* MESSAGE */
+
 #message {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: bold;
-  color: green;
+
+  color: #0b8f32;
+
   opacity: 0;
+
   margin-top: 20px;
 }
 
@@ -121,7 +179,10 @@ canvas {
   animation: pop 0.7s ease forwards;
 }
 
+/* ANIMATION */
+
 @keyframes pop {
+
   0% {
     transform: scale(0.5);
     opacity: 0;
@@ -138,34 +199,44 @@ canvas {
   }
 }
 
+/* CONFETTI */
+
 .confetti {
   position: fixed;
+
   width: 10px;
   height: 10px;
+
   top: -10px;
+
   animation: fall linear forwards;
+
   z-index: 999;
 }
 
 @keyframes fall {
+
   to {
     transform: translateY(110vh) rotate(360deg);
     opacity: 0;
   }
 }
 
+/* NOTE */
+
 .note {
   font-size: 16px;
-  margin-top: 25px;
-  line-height: 1.6;
+  margin-top: 24px;
+  line-height: 1.7;
   color: #222;
 }
 
 /* MOBILE */
+
 @media (max-width: 600px) {
 
   .overlay {
-    padding: 30px 20px;
+    padding: 28px 20px;
   }
 
   #datetime {
@@ -174,7 +245,6 @@ canvas {
 
   h2 {
     font-size: 24px;
-    line-height: 1.3;
   }
 
   .scratch-container {
@@ -187,7 +257,7 @@ canvas {
   }
 
   .reward-card p {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   #message {
@@ -213,8 +283,11 @@ canvas {
   <div class="scratch-container" id="scratchContainer">
 
     <div class="reward-card">
+
       <h3 id="rewardText">Scratch Me</h3>
+
       <p id="rewardCode"></p>
+
     </div>
 
     <canvas id="scratchCanvas"></canvas>
@@ -232,7 +305,8 @@ canvas {
 
 <script>
 
-// DATE & TIME
+// DATE TIME
+
 function updateDateTime() {
 
   const now = new Date();
@@ -246,20 +320,27 @@ function updateDateTime() {
 
   const time = now.toLocaleTimeString();
 
-  document.getElementById("datetime").innerText =
+  document.getElementById("datetime").innerHTML =
     "📅 " + date + " | ⏰ " + time;
 }
 
 setInterval(updateDateTime, 1000);
+
 updateDateTime();
 
 
-// REWARD SYSTEM
+// STORAGE
 
 const STORAGE_KEY = "rewardPlayedDate";
-const todayKey = new Date().toISOString().split("T")[0];
+
+const todayKey =
+  new Date().toISOString().split("T")[0];
+
+
+// REWARDS
 
 const NORMAL = [
+
   {text:"10% OFF",code:"UA-7B3M9Q"},
   {text:"11% OFF",code:"UA-K8F2A6"},
   {text:"12% OFF",code:"UA-9Q4L2X"},
@@ -273,50 +354,86 @@ const NORMAL = [
   {text:"Small Fries Free",code:"UA-FR88Q"},
   {text:"Free Ice Tea",code:"UA-T9F3KQ"},
   {text:"Free Iced Americano",code:"UA-A7M2QX"}
+
 ];
 
 const RARE = [
+
   {text:"20% OFF",code:"UA-F4Q9A2"}
+
 ];
 
 const ULTRA = [
+
   {text:"Buy 2 Get 1 On Any Pasta",code:"UA-PB7X2L"}
+
 ];
+
+
+// GET RANDOM REWARD
 
 function getReward() {
 
   const chance = Math.random();
 
   if(chance < 0.75) {
-    return NORMAL[Math.floor(Math.random() * NORMAL.length)];
+
+    return NORMAL[
+      Math.floor(Math.random() * NORMAL.length)
+    ];
   }
 
   else if(chance < 0.95) {
-    return RARE[Math.floor(Math.random() * RARE.length)];
+
+    return RARE[
+      Math.floor(Math.random() * RARE.length)
+    ];
   }
 
   else {
-    return ULTRA[Math.floor(Math.random() * ULTRA.length)];
+
+    return ULTRA[
+      Math.floor(Math.random() * ULTRA.length)
+    ];
   }
 }
 
-const rewardText = document.getElementById("rewardText");
-const rewardCode = document.getElementById("rewardCode");
-const message = document.getElementById("message");
+
+// ELEMENTS
+
+const rewardText =
+  document.getElementById("rewardText");
+
+const rewardCode =
+  document.getElementById("rewardCode");
+
+const message =
+  document.getElementById("message");
+
+
+// DAILY LIMIT
 
 if(localStorage.getItem(STORAGE_KEY) === todayKey) {
 
   rewardText.innerHTML = "❌ Already Played";
-  rewardCode.innerHTML = "Come back tomorrow";
+
+  rewardCode.innerHTML =
+    "Come back tomorrow";
 
 } else {
 
   const reward = getReward();
 
-  rewardText.innerHTML = reward.text;
-  rewardCode.innerHTML = "Code: " + reward.code;
+  rewardText.innerHTML =
+    reward.text;
 
-  localStorage.setItem(STORAGE_KEY, todayKey);
+  rewardCode.innerHTML =
+    "Code: " + reward.code;
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    todayKey
+  );
 
   setupScratchCard();
 }
@@ -326,19 +443,38 @@ if(localStorage.getItem(STORAGE_KEY) === todayKey) {
 
 function setupScratchCard() {
 
-  const canvas = document.getElementById("scratchCanvas");
-  const container = document.getElementById("scratchContainer");
+  const canvas =
+    document.getElementById("scratchCanvas");
 
-  canvas.width = container.offsetWidth;
-  canvas.height = container.offsetHeight;
+  const container =
+    document.getElementById("scratchContainer");
 
-  const ctx = canvas.getContext("2d");
+  canvas.width =
+    container.offsetWidth;
+
+  canvas.height =
+    container.offsetHeight;
+
+  const ctx =
+    canvas.getContext("2d");
+
+  // SCRATCH LAYER
 
   ctx.fillStyle = "#bdbdbd";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  // TEXT
 
   ctx.fillStyle = "#ffffff";
+
   ctx.font = "bold 23px Arial";
+
   ctx.textAlign = "center";
 
   ctx.fillText(
@@ -348,69 +484,126 @@ function setupScratchCard() {
   );
 
   let scratching = false;
+
   let revealed = false;
+
 
   function scratch(x, y) {
 
-    ctx.globalCompositeOperation = "destination-out";
+    ctx.globalCompositeOperation =
+      "destination-out";
 
     ctx.beginPath();
-    ctx.arc(x, y, 30, 0, Math.PI * 2);
+
+    ctx.arc(
+      x,
+      y,
+      30,
+      0,
+      Math.PI * 2
+    );
+
     ctx.fill();
 
     checkReveal();
   }
 
+
   function getXY(e) {
 
-    const rect = canvas.getBoundingClientRect();
+    const rect =
+      canvas.getBoundingClientRect();
 
     if(e.touches) {
 
       return {
-        x: e.touches[0].clientX - rect.left,
-        y: e.touches[0].clientY - rect.top
+
+        x:
+          e.touches[0].clientX - rect.left,
+
+        y:
+          e.touches[0].clientY - rect.top
       };
     }
 
     return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
+
+      x:
+        e.clientX - rect.left,
+
+      y:
+        e.clientY - rect.top
     };
   }
 
-  canvas.addEventListener("mousedown", () => scratching = true);
-  canvas.addEventListener("mouseup", () => scratching = false);
 
-  canvas.addEventListener("mousemove", e => {
+  // DESKTOP
 
-    if(!scratching) return;
+  canvas.addEventListener(
+    "mousedown",
+    () => scratching = true
+  );
 
-    const pos = getXY(e);
-    scratch(pos.x, pos.y);
-  });
+  canvas.addEventListener(
+    "mouseup",
+    () => scratching = false
+  );
 
-  canvas.addEventListener("touchstart", () => scratching = true);
-  canvas.addEventListener("touchend", () => scratching = false);
+  canvas.addEventListener(
+    "mousemove",
+    e => {
 
-  canvas.addEventListener("touchmove", e => {
+      if(!scratching) return;
 
-    e.preventDefault();
+      const pos = getXY(e);
 
-    if(!scratching) return;
+      scratch(pos.x, pos.y);
+    }
+  );
 
-    const pos = getXY(e);
-    scratch(pos.x, pos.y);
 
-  }, { passive:false });
+  // MOBILE
 
+  canvas.addEventListener(
+    "touchstart",
+    () => scratching = true
+  );
+
+  canvas.addEventListener(
+    "touchend",
+    () => scratching = false
+  );
+
+  canvas.addEventListener(
+    "touchmove",
+    e => {
+
+      e.preventDefault();
+
+      if(!scratching) return;
+
+      const pos = getXY(e);
+
+      scratch(pos.x, pos.y);
+
+    },
+    { passive:false }
+  );
+
+
+  // REVEAL CHECK
 
   function checkReveal() {
 
     if(revealed) return;
 
     const pixels =
-      ctx.getImageData(0,0,canvas.width,canvas.height).data;
+      ctx.getImageData(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      ).data;
 
     let transparent = 0;
 
@@ -422,17 +615,22 @@ function setupScratchCard() {
     }
 
     const percent =
-      transparent / (canvas.width * canvas.height);
+      transparent /
+      (canvas.width * canvas.height);
 
     if(percent > 0.4) {
 
       revealed = true;
 
-      canvas.style.transition = "opacity 0.6s";
+      canvas.style.transition =
+        "opacity 0.6s";
+
       canvas.style.opacity = 0;
 
       setTimeout(() => {
+
         canvas.remove();
+
       }, 700);
 
       showWin();
@@ -447,8 +645,11 @@ let confettiInterval = null;
 
 function showWin() {
 
-  message.innerText = "🎉 Discount Revealed!";
+  message.innerHTML =
+    "🎉 Discount Revealed!";
+
   message.classList.add("show");
+
   message.style.opacity = 1;
 
   startConfetti();
@@ -456,10 +657,14 @@ function showWin() {
   setTimeout(() => {
 
     clearInterval(confettiInterval);
+
     confettiInterval = null;
 
   }, 8000);
 }
+
+
+// CONFETTI
 
 function startConfetti() {
 
@@ -469,7 +674,8 @@ function startConfetti() {
 
     for(let i = 0; i < 8; i++) {
 
-      const confetti = document.createElement("div");
+      const confetti =
+        document.createElement("div");
 
       confetti.className = "confetti";
 
@@ -484,7 +690,11 @@ function startConfetti() {
 
       document.body.appendChild(confetti);
 
-      setTimeout(() => confetti.remove(), 4000);
+      setTimeout(() => {
+
+        confetti.remove();
+
+      }, 4000);
     }
 
   }, 700);
@@ -494,4 +704,3 @@ function startConfetti() {
 
 </body>
 </html>
-
