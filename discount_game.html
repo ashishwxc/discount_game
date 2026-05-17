@@ -262,53 +262,33 @@ const todayKey=
 new Date().toISOString().split("T")[0];
 
 const NORMAL=[
-
 {text:"10% OFF",code:"UA-10OFF"},
-{text:"11% OFF",code:"UA-11OFF"},
-{text:"12% OFF",code:"UA-12OFF"},
-{text:"13% OFF",code:"UA-13OFF"},
-{text:"14% OFF",code:"UA-14OFF"},
-{text:"16% OFF",code:"UA-16OFF"},
-{text:"17% OFF",code:"UA-17OFF"},
-{text:"18% OFF",code:"UA-18OFF"}
-
+{text:"15% OFF",code:"UA-15OFF"},
+{text:"20% OFF",code:"UA-20OFF"},
+{text:"25% OFF",code:"UA-25OFF"},
 ];
 
 const RARE=[
-
-{text:"20% OFF",code:"UA-20OFF"},
-{text:"25% OFF",code:"UA-25OFF"},
 {text:"30% OFF",code:"UA-30OFF"}
-
 ];
 
 const ULTRA=[
-
 {text:"35% OFF",code:"UA-35OFF"},
-{text:"40% OFF",code:"UA-40OFF"}
-
 ];
 
 function getReward(){
-
 const chance=Math.random();
-
 if(chance<0.75){
-
 return NORMAL[
 Math.floor(Math.random()*NORMAL.length)
 ];
 }
-
 else if(chance<0.95){
-
 return RARE[
 Math.floor(Math.random()*RARE.length)
 ];
 }
-
 else{
-
 return ULTRA[
 Math.floor(Math.random()*ULTRA.length)
 ];
@@ -325,23 +305,17 @@ const message=
 document.getElementById("message");
 
 if(localStorage.getItem(STORAGE_KEY)===todayKey){
-
 rewardText.innerHTML=
 "❌ Already Played";
-
 rewardCode.innerHTML=
 "Come back tomorrow";
-
-}else{
-
+}
+else{
 const reward=getReward();
-
 rewardText.innerHTML=
 reward.text;
-
 rewardCode.innerHTML=
 "Code: "+reward.code;
-
 localStorage.setItem(
 STORAGE_KEY,
 todayKey
@@ -351,10 +325,8 @@ setupScratchCard();
 }
 
 function setupScratchCard(){
-
 const canvas=
 document.getElementById("scratchCanvas");
-
 const container=
 document.getElementById("scratchContainer");
 
@@ -377,11 +349,8 @@ canvas.height
 );
 
 ctx.fillStyle="#ffffff";
-
 ctx.font="bold 23px Arial";
-
 ctx.textAlign="center";
-
 ctx.fillText(
 "SCRATCH HERE",
 canvas.width/2,
@@ -389,11 +358,8 @@ canvas.height/2+8
 );
 
 let scratching=false;
-
 let revealed=false;
-
 function scratch(x,y){
-
 ctx.globalCompositeOperation=
 "destination-out";
 
