@@ -7,196 +7,199 @@
 
 <style>
 
-/* RESET */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
 
-html,
-body {
-  width: 100%;
-  min-height: 100%;
-  overflow-x: hidden;
-  background: linear-gradient(135deg, #ffecd2, #fcb69f);
-  font-family: Arial, sans-serif;
+html,body{
+width:100%;
+min-height:100%;
+overflow-x:hidden;
+font-family:Arial,sans-serif;
 }
 
-body {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  position: relative;
+body{
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px;
+background-image:url('https://images.unsplash.com/photo-1516100882582-96c3a05fe590?q=80&w=1920&auto=format&fit=crop');
+background-size:cover;
+background-position:center;
+background-repeat:no-repeat;
+background-attachment:fixed;
+position:relative;
 }
 
-/* Prevent any accidental text overflow */
-body::before,
-body::after {
-  content: "";
-  display: none;
+body::before{
+content:"";
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.5);
+backdrop-filter:blur(2px);
+z-index:0;
 }
 
-.overlay {
-  width: 100%;
-  max-width: 560px;
-  background: rgba(255,255,255,0.96);
-  padding: 40px 30px;
-  border-radius: 20px;
-  text-align: center;
-  box-shadow: 0 10px 35px rgba(0,0,0,0.18);
-  position: relative;
-  z-index: 2;
+.overlay{
+width:100%;
+max-width:560px;
+background:rgba(255,255,255,0.95);
+padding:40px 30px;
+border-radius:20px;
+text-align:center;
+box-shadow:0 10px 35px rgba(0,0,0,0.18);
+position:relative;
+z-index:2;
 }
 
-#datetime {
-  font-size: 18px;
-  margin-bottom: 28px;
-  color: #555;
-  font-weight: bold;
-  line-height: 1.5;
+#datetime{
+font-size:18px;
+margin-bottom:28px;
+color:#555;
+font-weight:bold;
+line-height:1.5;
 }
 
-h2 {
-  font-size: 28px;
-  margin-bottom: 28px;
-  color: #000;
+h2{
+font-size:28px;
+margin-bottom:28px;
+color:#000;
 }
 
-.scratch-container {
-  position: relative;
-  width: 320px;
-  height: 180px;
-  margin: 0 auto 30px;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+.scratch-container{
+position:relative;
+width:320px;
+height:180px;
+margin:0 auto 30px;
+border-radius:16px;
+overflow:hidden;
+box-shadow:0 6px 18px rgba(0,0,0,0.2);
 }
 
-.reward-card {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #fff7cc, #ffe082);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  color: #222;
-  text-align: center;
+.reward-card{
+width:100%;
+height:100%;
+background:linear-gradient(135deg,#fff7cc,#ffe082);
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+padding:20px;
+color:#222;
+text-align:center;
 }
 
-.reward-card h3 {
-  font-size: 23px;
-  line-height: 1.3;
-  font-weight: bold;
+.reward-card h3{
+font-size:23px;
+line-height:1.3;
+font-weight:bold;
 }
 
-.reward-card p {
-  margin-top: 15px;
-  font-size: 18px;
-  font-weight: bold;
+.reward-card p{
+margin-top:15px;
+font-size:18px;
+font-weight:bold;
 }
 
-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
+canvas{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+cursor:pointer;
 }
 
-#message {
-  font-size: 28px;
-  font-weight: bold;
-  color: green;
-  opacity: 0;
-  margin-top: 20px;
+#message{
+font-size:28px;
+font-weight:bold;
+color:green;
+opacity:0;
+margin-top:20px;
 }
 
-.show {
-  animation: pop 0.7s ease forwards;
+.show{
+animation:pop 0.7s ease forwards;
 }
 
-@keyframes pop {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-
-  70% {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+@keyframes pop{
+0%{
+transform:scale(0.5);
+opacity:0;
+}
+70%{
+transform:scale(1.1);
+opacity:1;
+}
+100%{
+transform:scale(1);
+opacity:1;
+}
 }
 
-.confetti {
-  position: fixed;
-  width: 10px;
-  height: 10px;
-  top: -10px;
-  animation: fall linear forwards;
-  z-index: 999;
+.confetti{
+position:fixed;
+width:10px;
+height:10px;
+top:-10px;
+animation:fall linear forwards;
+z-index:999;
 }
 
-@keyframes fall {
-  to {
-    transform: translateY(110vh) rotate(360deg);
-    opacity: 0;
-  }
+@keyframes fall{
+to{
+transform:translateY(110vh) rotate(360deg);
+opacity:0;
+}
 }
 
-.note {
-  font-size: 16px;
-  margin-top: 25px;
-  line-height: 1.6;
-  color: #222;
+.note{
+font-size:16px;
+margin-top:25px;
+line-height:1.6;
+color:#222;
+font-weight:bold;
 }
 
-/* MOBILE */
-@media (max-width: 600px) {
+@media (max-width:600px){
 
-  .overlay {
-    padding: 30px 20px;
-  }
+.overlay{
+padding:30px 20px;
+}
 
-  #datetime {
-    font-size: 15px;
-  }
+#datetime{
+font-size:15px;
+}
 
-  h2 {
-    font-size: 24px;
-    line-height: 1.3;
-  }
+h2{
+font-size:24px;
+line-height:1.3;
+}
 
-  .scratch-container {
-    width: 260px;
-    height: 150px;
-  }
+.scratch-container{
+width:260px;
+height:150px;
+}
 
-  .reward-card h3 {
-    font-size: 20px;
-  }
+.reward-card h3{
+font-size:20px;
+}
 
-  .reward-card p {
-    font-size: 16px;
-  }
+.reward-card p{
+font-size:16px;
+}
 
-  #message {
-    font-size: 22px;
-  }
+#message{
+font-size:22px;
+}
 
-  .note {
-    font-size: 14px;
-  }
+.note{
+font-size:14px;
+}
+
 }
 
 </style>
@@ -206,288 +209,383 @@ canvas {
 
 <div class="overlay">
 
-  <div id="datetime"></div>
+<div id="datetime"></div>
 
-  <h2>🎉 Scratch & Win Reward 🎉</h2>
+<h2>🎉 Scratch & Win Reward 🎉</h2>
 
-  <div class="scratch-container" id="scratchContainer">
+<div class="scratch-container" id="scratchContainer">
 
-    <div class="reward-card">
-      <h3 id="rewardText">Scratch Me</h3>
-      <p id="rewardCode"></p>
-    </div>
+<div class="reward-card">
+<h3 id="rewardText">Scratch Me</h3>
+<p id="rewardCode"></p>
+</div>
 
-    <canvas id="scratchCanvas"></canvas>
+<canvas id="scratchCanvas"></canvas>
 
-  </div>
+</div>
 
-  <div id="message"></div>
+<div id="message"></div>
 
-  <p class="note">
-    Valid for same-day order only<br>
-    Share the screenshot with the restaurant to claim.
-  </p>
+<p class="note">
+Valid for same-day order only<br>
+Share the screenshot with the restaurant to claim.
+</p>
 
 </div>
 
 <script>
 
-// DATE & TIME
-function updateDateTime() {
+function updateDateTime(){
 
-  const now = new Date();
+const now=new Date();
 
-  const date = now.toLocaleDateString(undefined, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-  });
+const date=now.toLocaleDateString(undefined,{
+weekday:"long",
+day:"numeric",
+month:"long",
+year:"numeric"
+});
 
-  const time = now.toLocaleTimeString();
+const time=now.toLocaleTimeString();
 
-  document.getElementById("datetime").innerText =
-    "📅 " + date + " | ⏰ " + time;
+document.getElementById("datetime").innerText=
+"📅 "+date+" | ⏰ "+time;
 }
 
-setInterval(updateDateTime, 1000);
+setInterval(updateDateTime,1000);
+
 updateDateTime();
 
+const STORAGE_KEY="rewardPlayedDate";
 
-// REWARD SYSTEM
+const todayKey=
+new Date().toISOString().split("T")[0];
 
-const STORAGE_KEY = "rewardPlayedDate";
-const todayKey = new Date().toISOString().split("T")[0];
+const NORMAL=[
 
-const NORMAL = [
-  {text:"10% OFF",code:"UA-7B3M9Q"},
-  {text:"11% OFF",code:"UA-K8F2A6"},
-  {text:"12% OFF",code:"UA-9Q4L2X"},
-  {text:"13% OFF",code:"UA-M5A7C8"},
-  {text:"14% OFF",code:"UA-2XQ9F4"},
-  {text:"16% OFF",code:"UA-F4Q7A9"},
-  {text:"17% OFF",code:"UA-6C2X8L"},
-  {text:"18% OFF",code:"UA-Q9M5F2"},
-  {text:"Buy Any Burger and Get Fries Free",code:"UA-BG7K2"},
-  {text:"Buy 2 Beverages, Get 1 Free",code:"UA-B21QX"},
-  {text:"Small Fries Free",code:"UA-FR88Q"},
-  {text:"Free Ice Tea",code:"UA-T9F3KQ"},
-  {text:"Free Iced Americano",code:"UA-A7M2QX"}
+{text:"10% OFF",code:"UA-10OFF"},
+{text:"11% OFF",code:"UA-11OFF"},
+{text:"12% OFF",code:"UA-12OFF"},
+{text:"13% OFF",code:"UA-13OFF"},
+{text:"14% OFF",code:"UA-14OFF"},
+{text:"16% OFF",code:"UA-16OFF"},
+{text:"17% OFF",code:"UA-17OFF"},
+{text:"18% OFF",code:"UA-18OFF"}
+
 ];
 
-const RARE = [
-  {text:"20% OFF",code:"UA-F4Q9A2"}
+const RARE=[
+
+{text:"20% OFF",code:"UA-20OFF"},
+{text:"25% OFF",code:"UA-25OFF"},
+{text:"30% OFF",code:"UA-30OFF"}
+
 ];
 
-const ULTRA = [
-  {text:"Buy 2 Get 1 On Any Pasta",code:"UA-PB7X2L"}
+const ULTRA=[
+
+{text:"35% OFF",code:"UA-35OFF"},
+{text:"40% OFF",code:"UA-40OFF"}
+
 ];
 
-function getReward() {
+function getReward(){
 
-  const chance = Math.random();
+const chance=Math.random();
 
-  if(chance < 0.75) {
-    return NORMAL[Math.floor(Math.random() * NORMAL.length)];
-  }
+if(chance<0.75){
 
-  else if(chance < 0.95) {
-    return RARE[Math.floor(Math.random() * RARE.length)];
-  }
-
-  else {
-    return ULTRA[Math.floor(Math.random() * ULTRA.length)];
-  }
+return NORMAL[
+Math.floor(Math.random()*NORMAL.length)
+];
 }
 
-const rewardText = document.getElementById("rewardText");
-const rewardCode = document.getElementById("rewardCode");
-const message = document.getElementById("message");
+else if(chance<0.95){
 
-if(localStorage.getItem(STORAGE_KEY) === todayKey) {
-
-  rewardText.innerHTML = "❌ Already Played";
-  rewardCode.innerHTML = "Come back tomorrow";
-
-} else {
-
-  const reward = getReward();
-
-  rewardText.innerHTML = reward.text;
-  rewardCode.innerHTML = "Code: " + reward.code;
-
-  localStorage.setItem(STORAGE_KEY, todayKey);
-
-  setupScratchCard();
+return RARE[
+Math.floor(Math.random()*RARE.length)
+];
 }
 
+else{
 
-// SCRATCH CARD
-
-function setupScratchCard() {
-
-  const canvas = document.getElementById("scratchCanvas");
-  const container = document.getElementById("scratchContainer");
-
-  canvas.width = container.offsetWidth;
-  canvas.height = container.offsetHeight;
-
-  const ctx = canvas.getContext("2d");
-
-  ctx.fillStyle = "#bdbdbd";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 23px Arial";
-  ctx.textAlign = "center";
-
-  ctx.fillText(
-    "SCRATCH HERE",
-    canvas.width / 2,
-    canvas.height / 2 + 8
-  );
-
-  let scratching = false;
-  let revealed = false;
-
-  function scratch(x, y) {
-
-    ctx.globalCompositeOperation = "destination-out";
-
-    ctx.beginPath();
-    ctx.arc(x, y, 30, 0, Math.PI * 2);
-    ctx.fill();
-
-    checkReveal();
-  }
-
-  function getXY(e) {
-
-    const rect = canvas.getBoundingClientRect();
-
-    if(e.touches) {
-
-      return {
-        x: e.touches[0].clientX - rect.left,
-        y: e.touches[0].clientY - rect.top
-      };
-    }
-
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    };
-  }
-
-  canvas.addEventListener("mousedown", () => scratching = true);
-  canvas.addEventListener("mouseup", () => scratching = false);
-
-  canvas.addEventListener("mousemove", e => {
-
-    if(!scratching) return;
-
-    const pos = getXY(e);
-    scratch(pos.x, pos.y);
-  });
-
-  canvas.addEventListener("touchstart", () => scratching = true);
-  canvas.addEventListener("touchend", () => scratching = false);
-
-  canvas.addEventListener("touchmove", e => {
-
-    e.preventDefault();
-
-    if(!scratching) return;
-
-    const pos = getXY(e);
-    scratch(pos.x, pos.y);
-
-  }, { passive:false });
-
-
-  function checkReveal() {
-
-    if(revealed) return;
-
-    const pixels =
-      ctx.getImageData(0,0,canvas.width,canvas.height).data;
-
-    let transparent = 0;
-
-    for(let i = 3; i < pixels.length; i += 4) {
-
-      if(pixels[i] < 128) {
-        transparent++;
-      }
-    }
-
-    const percent =
-      transparent / (canvas.width * canvas.height);
-
-    if(percent > 0.4) {
-
-      revealed = true;
-
-      canvas.style.transition = "opacity 0.6s";
-      canvas.style.opacity = 0;
-
-      setTimeout(() => {
-        canvas.remove();
-      }, 700);
-
-      showWin();
-    }
-  }
+return ULTRA[
+Math.floor(Math.random()*ULTRA.length)
+];
+}
 }
 
+const rewardText=
+document.getElementById("rewardText");
 
-// WIN EFFECT
+const rewardCode=
+document.getElementById("rewardCode");
 
-let confettiInterval = null;
+const message=
+document.getElementById("message");
 
-function showWin() {
+if(localStorage.getItem(STORAGE_KEY)===todayKey){
 
-  message.innerText = "🎉 Discount Revealed!";
-  message.classList.add("show");
-  message.style.opacity = 1;
+rewardText.innerHTML=
+"❌ Already Played";
 
-  startConfetti();
+rewardCode.innerHTML=
+"Come back tomorrow";
 
-  setTimeout(() => {
+}else{
 
-    clearInterval(confettiInterval);
-    confettiInterval = null;
+const reward=getReward();
 
-  }, 8000);
+rewardText.innerHTML=
+reward.text;
+
+rewardCode.innerHTML=
+"Code: "+reward.code;
+
+localStorage.setItem(
+STORAGE_KEY,
+todayKey
+);
+
+setupScratchCard();
 }
 
-function startConfetti() {
+function setupScratchCard(){
 
-  if(confettiInterval) return;
+const canvas=
+document.getElementById("scratchCanvas");
 
-  confettiInterval = setInterval(() => {
+const container=
+document.getElementById("scratchContainer");
 
-    for(let i = 0; i < 8; i++) {
+canvas.width=
+container.offsetWidth;
 
-      const confetti = document.createElement("div");
+canvas.height=
+container.offsetHeight;
 
-      confetti.className = "confetti";
+const ctx=
+canvas.getContext("2d");
 
-      confetti.style.left =
-        Math.random() * 100 + "vw";
+ctx.fillStyle="#bdbdbd";
 
-      confetti.style.backgroundColor =
-        `hsl(${Math.random()*360},100%,50%)`;
+ctx.fillRect(
+0,
+0,
+canvas.width,
+canvas.height
+);
 
-      confetti.style.animationDuration =
-        Math.random() * 2 + 2 + "s";
+ctx.fillStyle="#ffffff";
 
-      document.body.appendChild(confetti);
+ctx.font="bold 23px Arial";
 
-      setTimeout(() => confetti.remove(), 4000);
-    }
+ctx.textAlign="center";
 
-  }, 700);
+ctx.fillText(
+"SCRATCH HERE",
+canvas.width/2,
+canvas.height/2+8
+);
+
+let scratching=false;
+
+let revealed=false;
+
+function scratch(x,y){
+
+ctx.globalCompositeOperation=
+"destination-out";
+
+ctx.beginPath();
+
+ctx.arc(
+x,
+y,
+30,
+0,
+Math.PI*2
+);
+
+ctx.fill();
+
+checkReveal();
+}
+
+function getXY(e){
+
+const rect=
+canvas.getBoundingClientRect();
+
+if(e.touches){
+
+return{
+
+x:
+e.touches[0].clientX-rect.left,
+
+y:
+e.touches[0].clientY-rect.top
+};
+}
+
+return{
+
+x:
+e.clientX-rect.left,
+
+y:
+e.clientY-rect.top
+};
+}
+
+canvas.addEventListener(
+"mousedown",
+()=>scratching=true
+);
+
+canvas.addEventListener(
+"mouseup",
+()=>scratching=false
+);
+
+canvas.addEventListener(
+"mousemove",
+e=>{
+
+if(!scratching)return;
+
+const pos=getXY(e);
+
+scratch(pos.x,pos.y);
+}
+);
+
+canvas.addEventListener(
+"touchstart",
+()=>scratching=true
+);
+
+canvas.addEventListener(
+"touchend",
+()=>scratching=false
+);
+
+canvas.addEventListener(
+"touchmove",
+e=>{
+
+e.preventDefault();
+
+if(!scratching)return;
+
+const pos=getXY(e);
+
+scratch(pos.x,pos.y);
+
+},
+{passive:false}
+);
+
+function checkReveal(){
+
+if(revealed)return;
+
+const pixels=
+ctx.getImageData(
+0,
+0,
+canvas.width,
+canvas.height
+).data;
+
+let transparent=0;
+
+for(let i=3;i<pixels.length;i+=4){
+
+if(pixels[i]<128){
+transparent++;
+}
+}
+
+const percent=
+transparent/
+(canvas.width*canvas.height);
+
+if(percent>0.4){
+
+revealed=true;
+
+canvas.style.transition=
+"opacity 0.6s";
+
+canvas.style.opacity=0;
+
+setTimeout(()=>{
+
+canvas.remove();
+
+},700);
+
+showWin();
+}
+}
+}
+
+let confettiInterval=null;
+
+function showWin(){
+
+message.innerText=
+"🎉 Discount Revealed!";
+
+message.classList.add("show");
+
+message.style.opacity=1;
+
+startConfetti();
+
+setTimeout(()=>{
+
+clearInterval(confettiInterval);
+
+confettiInterval=null;
+
+},8000);
+}
+
+function startConfetti(){
+
+if(confettiInterval)return;
+
+confettiInterval=setInterval(()=>{
+
+for(let i=0;i<8;i++){
+
+const confetti=
+document.createElement("div");
+
+confetti.className="confetti";
+
+confetti.style.left=
+Math.random()*100+"vw";
+
+confetti.style.backgroundColor=
+`hsl(${Math.random()*360},100%,50%)`;
+
+confetti.style.animationDuration=
+Math.random()*2+2+"s";
+
+document.body.appendChild(confetti);
+
+setTimeout(()=>{
+
+confetti.remove();
+
+},4000);
+}
+
+},700);
 }
 
 </script>
