@@ -212,26 +212,21 @@ font-size:14px;
 <div id="datetime"></div>
 
 <h2>🎉 Scratch & Win Reward 🎉</h2>
-
 <div class="scratch-container" id="scratchContainer">
-
 <div class="reward-card">
 <h3 id="rewardText">Scratch Me</h3>
 <p id="rewardCode"></p>
 </div>
-
 <canvas id="scratchCanvas"></canvas>
-
 </div>
-
+  
 <div id="message"></div>
 
 <p class="note">
 Valid for same-day order only<br>
-Share the screenshot with the restaurant to claim.<br> 
-  ⚠️ Discount will not apply without showing the scratch card screenshot at the restaurant.
+Share the screenshot with the restaurant to claim.<br><br>
+⚠️ Discount will not apply without showing the scratch card screenshot at the restaurant.
 </p>
-
 </div>
 
 <script>
@@ -263,13 +258,14 @@ const todayKey=
 new Date().toISOString().split("T")[0];
 
 const NORMAL=[
+
 {text:"10% OFF",code:"UA-10OFF"},
 {text:"15% OFF",code:"UA-15OFF"},
 {text:"20% OFF",code:"UA-20OFF"},
-{text:"25% OFF",code:"UA-25OFF"},
 ];
 
 const RARE=[
+{text:"25% OFF",code:"UA-25OFF"},
 {text:"30% OFF",code:"UA-30OFF"}
 ];
 
@@ -284,11 +280,13 @@ return NORMAL[
 Math.floor(Math.random()*NORMAL.length)
 ];
 }
+
 else if(chance<0.95){
 return RARE[
 Math.floor(Math.random()*RARE.length)
 ];
 }
+
 else{
 return ULTRA[
 Math.floor(Math.random()*ULTRA.length)
@@ -306,28 +304,33 @@ const message=
 document.getElementById("message");
 
 if(localStorage.getItem(STORAGE_KEY)===todayKey){
+
 rewardText.innerHTML=
-"❌ Already Played";
+"❌ Already Scratched Today";
+
 rewardCode.innerHTML=
 "Come back tomorrow";
-}
-else{
+
+document.getElementById("scratchCanvas").style.display="none";
+
+}else{
+
 const reward=getReward();
+
 rewardText.innerHTML=
 reward.text;
+
 rewardCode.innerHTML=
 "Code: "+reward.code;
-localStorage.setItem(
-STORAGE_KEY,
-todayKey
-);
 
 setupScratchCard();
 }
 
 function setupScratchCard(){
+
 const canvas=
 document.getElementById("scratchCanvas");
+
 const container=
 document.getElementById("scratchContainer");
 
@@ -350,8 +353,11 @@ canvas.height
 );
 
 ctx.fillStyle="#ffffff";
+
 ctx.font="bold 23px Arial";
+
 ctx.textAlign="center";
+
 ctx.fillText(
 "SCRATCH HERE",
 canvas.width/2,
@@ -359,8 +365,11 @@ canvas.height/2+8
 );
 
 let scratching=false;
+
 let revealed=false;
+
 function scratch(x,y){
+
 ctx.globalCompositeOperation=
 "destination-out";
 
@@ -502,6 +511,11 @@ showWin();
 let confettiInterval=null;
 
 function showWin(){
+
+localStorage.setItem(
+STORAGE_KEY,
+todayKey
+);
 
 message.innerText=
 "🎉 Discount Revealed!";
